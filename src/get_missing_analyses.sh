@@ -17,6 +17,7 @@ Options (all options required):
 -f CATALOG_FILTER: string used to filter contents of catalog file for this analysis.  See below
 -G UUID_COL: comma-separated list of integers which identify columns having UUIDs in DAS
    e.g., -G 12,14.  Default: 12
+-D: disregard any datasets with the string "deprecated" in the catalog line
 
 Given a list of cases of interest for one disease, identify the UUIDs for which
 analyses need to be performed and the UUIDs which need to be downloaded to a
@@ -43,10 +44,10 @@ Algorithm and outputs
   3. Get all UUIDs which have been analyzed (analyzed UUIDs)
      -> Based on data analysis summary file
      -> tumor/normal pipelines parsed to capture both input UUIDs
-     -> Writes out OUTD/DIS/analyzed_UUIDs.dat
+     -> Writes out OUTD/DIS/analyzed_UUID.dat
   4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
      -> These are the UUIDs which are to be analyzed
-     -> Writes out OUTD/DIS/analysis_UUIDs.dat
+     -> Writes out OUTD/DIS/analysis_UUID.dat
   5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
      -> Writes out OUTD/DIS/download_UUID.dat
 EOF
@@ -54,7 +55,7 @@ EOF
 UUID_COL="12"
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":hd:c:a:b:o:s:f:G:" opt; do
+while getopts ":hd:c:a:b:o:s:f:G:D" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -83,6 +84,9 @@ while getopts ":hd:c:a:b:o:s:f:G:" opt; do
       ;;
     G) 
       UUID_COL="$OPTARG"
+      ;;
+    D) 
+      REMOVE_DEPRECATED=1
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -156,6 +160,10 @@ if [ -z "$CATALOG_FILTER" ]; then
     exit
 fi
 
+if [ $REMOVE_DEPRECATED ]; then
+    CATALOG_FILTER="grep -v deprecated | $CATALOG_FILTER"
+fi
+
 function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
@@ -179,26 +187,13 @@ function report {
 
 mkdir -p $OUTD/$DIS
 
-#  1. we are given list of cases of interest (-s CASES)
-#  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
-#  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
-#     -> Based on data analysis summary file
-#     -> capture all input UUIDs
-#     -> Writes out OUTD/DIS/analyzed_UUIDs.dat
-#  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
-#     -> These are the UUIDs which are to be analyzed
-#     -> Writes out OUTD/DIS/analysis_UUIDs.dat
-#  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
-#     -> Writes out OUTD/DIS/download_UUID.dat
-
-
 #  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
 #     Find all appropriate datasets (as determined by CATALOG_FILTER) whose case is in CASES file
 #     and extract the UUID
 #     Using AWK to evaluate case field ($2) of CATALOG file
 # https://stackoverflow.com/questions/42851582/find-in-word-from-one-file-to-another-file-using-awk-nr-fnr
 
-UUIDS_OF_INTEREST="$OUTD/$DIS/UUIDs_of_interest.dat"
+UUIDS_OF_INTEREST="$OUTD/$DIS/UUID_of_interest.dat"
 CMD="awk 'FNR==NR{a[\$0];next} (\$2 in a) {print \$0}' $CASES $CATALOG | $CATALOG_FILTER | cut -f 11 | sort -u > $UUIDS_OF_INTEREST"
 >&2 echo Running: $CMD
 eval $CMD
@@ -206,7 +201,7 @@ test_exit_status
 report $UUIDS_OF_INTEREST
 
 #  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
-OUT_ANALYZED="$OUTD/$DIS/analyzed_UUIDs.dat"
+OUT_ANALYZED="$OUTD/$DIS/analyzed_UUID.dat"
 CMD="awk -v dis=$DIS 'BEGIN{FS=\"\t\";OFS=\"\t\"}{if (\$2 == dis ) print }' $DAS | cut -f $UUID_COL | tr '\t' '\n' | sort -u > $OUT_ANALYZED"
 >&2 echo Running: $CMD
 eval $CMD
@@ -215,13 +210,21 @@ report $OUT_ANALYZED
 
 #  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
 #     -> These are the UUIDs which are to be analyzed
-#     -> Writes out OUTD/DIS/analysis_UUIDs.dat
-OUT_ANALYSIS="$OUTD/$DIS/analysis_UUIDs.dat"
+#     -> Writes out OUTD/DIS/analysis_UUID.dat
+OUT_ANALYSIS="$OUTD/$DIS/analysis_UUID.dat"
 CMD="comm -23 $UUIDS_OF_INTEREST $OUT_ANALYZED  > $OUT_ANALYSIS"
 >&2 echo Running: $CMD
 eval $CMD
 test_exit_status
 report $OUT_ANALYSIS
+
+# For convenience of analysts, also create file which lists sample names associated with analysis UUIDs
+OUT_ANALYSIS_SN="$OUTD/$DIS/analysis_SN.dat"
+CMD="fgrep -f $OUT_ANALYSIS $CATALOG | cut -f 1,2,3,11 | sort > $OUT_ANALYSIS_SN"
+>&2 echo Running: $CMD
+eval $CMD
+test_exit_status
+report $OUT_ANALYSIS_SN
 
 #  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
 #     -> Writes out OUTD/DIS/download_UUID.dat
