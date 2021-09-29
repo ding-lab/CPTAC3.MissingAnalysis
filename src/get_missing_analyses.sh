@@ -15,6 +15,14 @@ Options (all options required):
 -o OUTD: Output directory
 -s CASES: Path to file listing cases of interest
 -f CATALOG_FILTER: string used to filter contents of catalog file for this analysis.  See below
+-G UUID_COL: comma-separated list of integers which identify columns having UUIDs in DAS
+   e.g., -G 12,14.  Default: 12
+
+Given a list of cases of interest for one disease, identify the UUIDs for which
+analyses need to be performed and the UUIDs which need to be downloaded to a
+particular system.  This workflow is UUID (rather than CASE) centric, so that
+it can identify analyses to perform even when some analyses have been performed
+for that case
 
 Catalog, data analysis summary, and BamMap files can be found in 
 [CPTAC3 Catalog project](https://github.com/ding-lab/CPTAC3.catalog)
@@ -26,22 +34,27 @@ CATALOG_FILTER is string in the form of unix pipes which identifies entries in c
   Note that in some cases it may be necessary to filter catalog file more precisely by using e.g. awk
   to evaluate particular fields 
 
+For pipelines which take two UUIDs as input (either tumor/normal, or red/green for Methylation),
+-G flag allows both to be obtained from analysis summary file (columns 12 and 14)
+
 Algorithm and outputs
-  0. we are given list of cases of interest (-s CASES)
-  1. Get all cases of a disease which have been analyzed (analyzed cases)
-     -> Writes out OUTD/DIS/analyzed_cases.dat
-  2. Find target cases as difference between cases of interest and analyzed cases
-     -> Writes out OUTD/DIS/target_cases.dat
-  3. Find cases to analyze as target cases which have data available at GDC (analysis cases)
-     -> Writes out OUTD/DIS/analysis_cases.dat
-  4. Find UUIDs associated with data required for processing of analysis cases (analysis UUID)
-     -> Writes out OUTD/DIS/analysis_UUID.dat
+  1. we are given list of cases of interest (-s CASES)
+  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
+  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
+     -> Based on data analysis summary file
+     -> tumor/normal pipelines parsed to capture both input UUIDs
+     -> Writes out OUTD/DIS/analyzed_UUIDs.dat
+  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
+     -> These are the UUIDs which are to be analyzed
+     -> Writes out OUTD/DIS/analysis_UUIDs.dat
   5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
      -> Writes out OUTD/DIS/download_UUID.dat
 EOF
 
+UUID_COL="12"
+
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":hd:c:a:b:o:s:f:" opt; do
+while getopts ":hd:c:a:b:o:s:f:G:" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -67,6 +80,9 @@ while getopts ":hd:c:a:b:o:s:f:" opt; do
       ;;
     f) 
       CATALOG_FILTER="$OPTARG"
+      ;;
+    G) 
+      UUID_COL="$OPTARG"
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -163,58 +179,56 @@ function report {
 
 mkdir -p $OUTD/$DIS
 
-#  0. we are given list of cases of interest (-s CASES)
-#  1. Get all cases of a disease which have been analyzed (analyzed cases)
-#     -> Writes out OUTD/DIS/analyzed_cases.dat
-#  2. Find target cases as difference between cases of interest and analyzed cases
-#     -> Writes out OUTD/DIS/target_cases.dat
-#  3. Find cases to analyze as target cases which have data available at GDC (analysis cases)
-#     -> Writes out OUTD/DIS/analysis_cases.dat
-#  4. Find UUIDs associated with data required for processing of analysis cases (analysis UUID)
-#     -> Writes out OUTD/DIS/analysis_UUID.dat
+#  1. we are given list of cases of interest (-s CASES)
+#  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
+#  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
+#     -> Based on data analysis summary file
+#     -> capture all input UUIDs
+#     -> Writes out OUTD/DIS/analyzed_UUIDs.dat
+#  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
+#     -> These are the UUIDs which are to be analyzed
+#     -> Writes out OUTD/DIS/analysis_UUIDs.dat
 #  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
 #     -> Writes out OUTD/DIS/download_UUID.dat
 
-#  1. Get all cases of a disease which have been analyzed
-OUT_ANALYZED="$OUTD/$DIS/analyzed_cases.dat"
-CMD="awk -v dis=$DIS 'BEGIN{FS=\"\t\";OFS=\"\t\"}{if (\$2 == dis ) print \$1}' $DAS | cut -f 1 | sort -u > $OUT_ANALYZED"
+
+#  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
+#     Find all appropriate datasets (as determined by CATALOG_FILTER) whose case is in CASES file
+#     and extract the UUID
+#     Using AWK to evaluate case field ($2) of CATALOG file
+# https://stackoverflow.com/questions/42851582/find-in-word-from-one-file-to-another-file-using-awk-nr-fnr
+
+UUIDS_OF_INTEREST="$OUTD/$DIS/UUIDs_of_interest.dat"
+CMD="awk 'FNR==NR{a[\$0];next} (\$2 in a) {print \$0}' $CASES $CATALOG | $CATALOG_FILTER | cut -f 11 | sort -u > $UUIDS_OF_INTEREST"
+>&2 echo Running: $CMD
+eval $CMD
+test_exit_status
+report $UUIDS_OF_INTEREST
+
+#  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
+OUT_ANALYZED="$OUTD/$DIS/analyzed_UUIDs.dat"
+CMD="awk -v dis=$DIS 'BEGIN{FS=\"\t\";OFS=\"\t\"}{if (\$2 == dis ) print }' $DAS | cut -f $UUID_COL | tr '\t' '\n' | sort -u > $OUT_ANALYZED"
 >&2 echo Running: $CMD
 eval $CMD
 test_exit_status
 report $OUT_ANALYZED 
 
-# 2. Find those cases of interest which are not in list of analyzed cases
-# i.e., find cases in interest and analyzed lists unique to interest
-OUT_TARGET="$OUTD/$DIS/target_cases.dat"
-CMD="comm -23 $CASES $OUT_ANALYZED  > $OUT_TARGET"
+#  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
+#     -> These are the UUIDs which are to be analyzed
+#     -> Writes out OUTD/DIS/analysis_UUIDs.dat
+OUT_ANALYSIS="$OUTD/$DIS/analysis_UUIDs.dat"
+CMD="comm -23 $UUIDS_OF_INTEREST $OUT_ANALYZED  > $OUT_ANALYSIS"
 >&2 echo Running: $CMD
 eval $CMD
 test_exit_status
-report $OUT_TARGET
+report $OUT_ANALYSIS
 
-# 3. Now make a list of those cases which we want which also have data available
-# this is the list of cases of interest not yet analyzed available at GDC
-# and is the list of new analyses we want to do
-OUT_TO_ANALYZE="$OUTD/$DIS/analysis_cases.dat"
-CMD="grep -f $OUT_TARGET $CATALOG | $CATALOG_FILTER | cut -f 2 | sort -u > $OUT_TO_ANALYZE"
+#  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
+#     -> Writes out OUTD/DIS/download_UUID.dat
+OUT_DOWNLOAD_UUID="$OUTD/$DIS/download_UUID.dat"
+CMD="comm -23 $OUT_ANALYSIS <(cut -f 10 $BAMMAP | sort) > $OUT_DOWNLOAD_UUID"
 >&2 echo Running: $CMD
 eval $CMD
 test_exit_status
-report $OUT_TO_ANALYZE
+report $OUT_DOWNLOAD_UUID
 
-# 4. Next, get list of all UUIDs associated with relevant data for cases to analyze
-OUT_TO_ANALYZE_UUID="$OUTD/$DIS/analysis_UUID.dat"
-CMD="grep -f $OUT_TO_ANALYZE $CATALOG | $CATALOG_FILTER | cut -f 11 | sort -u > $OUT_TO_ANALYZE_UUID"
->&2 echo Running: $CMD
-eval $CMD
-test_exit_status
-report $OUT_TO_ANALYZE_UUID
-
-# 5. Finally, get UUIDs to download - those on UUIDs to analyze not on system of interest
-# This is those UUIDs unique to cases_to_analyze_UUID not in bammap
-OUT_TO_DOWNLOAD_UUID="$OUTD/$DIS/download_UUID.dat"
-CMD="comm -23 $OUT_TO_ANALYZE_UUID <(cut -f 10 $BAMMAP | sort) > $OUT_TO_DOWNLOAD_UUID"
->&2 echo Running: $CMD
-eval $CMD
-test_exit_status
-report $OUT_TO_DOWNLOAD_UUID
