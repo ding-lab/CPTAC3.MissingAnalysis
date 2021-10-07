@@ -7,7 +7,7 @@ DCC_UUID_COL="12"
 # Processing WXS hg38 on MGI
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/WXS_Germline.DCC_analysis_summary.dat"
 BAMMAP="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/BamMap/MGI.BamMap.dat"
-CATALOG_FILTER="grep WXS | grep hg38 "
+CATALOG_FILTER="grep WXS | grep hg38 | grep blood_normal"
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/CPTAC3.Catalog.dat"
 
 # General scripts
