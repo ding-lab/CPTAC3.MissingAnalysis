@@ -7,7 +7,7 @@ DCC_UUID_COL="12,14"
 # Processing WGS hg38 on storage1
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/WGS_SV.DCC_analysis_summary.dat"
 BAMMAP="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/BamMap/storage1.BamMap.dat"
-CATALOG_FILTER="grep WGS | grep hg38 "
+CATALOG_FILTER="grep WGS | grep hg38 | grep -v tissue_normal"
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/CPTAC3.Catalog.dat"
 
 # General scripts

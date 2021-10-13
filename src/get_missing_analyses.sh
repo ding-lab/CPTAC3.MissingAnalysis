@@ -48,6 +48,7 @@ Algorithm and outputs
   4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
      -> These are the UUIDs which are to be analyzed
      -> Writes out OUTD/DIS/analysis_UUID.dat
+     -> Also writes OUTD/DIS/analysis_SN.dat, with the fields "sample_name, case, disease, UUID"
   5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
      -> Writes out OUTD/DIS/download_UUID.dat
 EOF
