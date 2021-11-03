@@ -11,6 +11,8 @@ Note, we want to process all existing data for GBM and PDA regardless of
 cohort, including heterogeneity data (where previously processed cases may have
 additional data)
 
+Upon requesting to analysts, this will be "batch_1021"
+
 # Case lists
 
 Case lists are created with the script `0_make_case_list.sh`
@@ -27,6 +29,8 @@ Algorithm and outputs
   4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
      -> These are the UUIDs which are to be analyzed
      -> Writes out OUTD/DIS/analysis_UUID.dat
+     -> Also writes OUTD/DIS/analysis_SN.dat, with the fields "sample_name, case, disease, UUID"
+        
   5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
      -> Writes out OUTD/DIS/download_UUID.dat
 
@@ -92,29 +96,28 @@ RNA-Seq Transcript files to download
       14 dat/RNA-Seq_Transcript/PDA/download_UUID.dat
      328 total
 --
-Summary
 WGS SV UUID to run
       75 dat/WGS_SV/CCRCC/analysis_SN.dat
        6 dat/WGS_SV/GBM/analysis_SN.dat
-      65 dat/WGS_SV/PDA/analysis_SN.dat
-     146 total
+      26 dat/WGS_SV/PDA/analysis_SN.dat
+     107 total
 WGS SV files to download
-      75 dat/WGS_SV/CCRCC/download_UUID.dat
-       5 dat/WGS_SV/GBM/download_UUID.dat
+       2 dat/WGS_SV/CCRCC/download_UUID.dat
+       0 dat/WGS_SV/GBM/download_UUID.dat
        0 dat/WGS_SV/PDA/download_UUID.dat
-      80 total
+       2 total
 --
 Summary
 WGS CNV UUID to run
       75 dat/WGS_CNV_Somatic/CCRCC/analysis_SN.dat
      146 dat/WGS_CNV_Somatic/GBM/analysis_SN.dat
-      65 dat/WGS_CNV_Somatic/PDA/analysis_SN.dat
-     286 total
+      26 dat/WGS_CNV_Somatic/PDA/analysis_SN.dat
+     247 total
 WGS CNV files to download
-      75 dat/WGS_CNV_Somatic/CCRCC/download_UUID.dat
-       5 dat/WGS_CNV_Somatic/GBM/download_UUID.dat
+       2 dat/WGS_CNV_Somatic/CCRCC/download_UUID.dat
+       0 dat/WGS_CNV_Somatic/GBM/download_UUID.dat
        0 dat/WGS_CNV_Somatic/PDA/download_UUID.dat
-      80 total
+       2 total
 --
 Summary
 WXS MSI UUIDs to run
