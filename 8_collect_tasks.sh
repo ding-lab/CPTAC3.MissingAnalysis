@@ -22,3 +22,4 @@ for p in $PIPELINES; do
 done
 
 
+>&2 echo Collected results written to $OUTD/PIPELINE.analysis_SN.dat

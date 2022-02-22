@@ -26,7 +26,7 @@ dat/WXS_Somatic_Variant_TD/*/download_UUID.dat | sort -u > $OUTD_DL/MGI.download
 echo Running: $CMD
 eval $CMD
 
-# All WGS pipelines are run on storage1
+# All WGS pipelines as well as WXS are run on storage1
 CMD="cat  \
 dat/WGS_CNV_Somatic/*/download_UUID.dat \
 dat/WGS_SV/*/download_UUID.dat \

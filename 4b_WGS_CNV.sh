@@ -10,4 +10,4 @@ echo Summary
 echo WGS CNV UUID to run
 wc -l $OUTD/*/analysis_SN.dat
 echo WGS CNV files to download
-wc -l $OUTD/*/download_UUID.dat
+wc -l $OUTD/*/download_UUID.*.dat

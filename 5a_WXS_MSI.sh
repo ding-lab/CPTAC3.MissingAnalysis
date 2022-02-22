@@ -10,4 +10,4 @@ echo Summary
 echo WXS MSI UUIDs to run
 wc -l $OUTD/*/analysis_SN.dat
 echo WXS MSI files to download
-wc -l $OUTD/*/download_UUID.dat
+wc -l $OUTD/*/download_UUID.*.dat

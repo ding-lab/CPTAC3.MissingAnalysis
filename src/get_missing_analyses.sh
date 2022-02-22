@@ -11,7 +11,6 @@ Options (all options required):
 -d DIS : Disease. e.g., LUAD
 -c CATALOG: Path to catalog file.  
 -a DAS: Path to data analysis summary file
--b BAMMAP: Path to BamMap file
 -o OUTD: Output directory
 -s CASES: Path to file listing cases of interest
 -f CATALOG_FILTER: string used to filter contents of catalog file for this analysis.  See below
@@ -20,7 +19,7 @@ Options (all options required):
 -D: disregard any datasets with the string "deprecated" in the catalog line
 
 Given a list of cases of interest for one disease, identify the UUIDs for which
-analyses need to be performed and the UUIDs which need to be downloaded to a
+analyses need to be performed.  Does not identify which UUIDs need to be downloaded to a
 particular system.  This workflow is UUID (rather than CASE) centric, so that
 it can identify analyses to perform even when some analyses have been performed
 for that case
@@ -49,14 +48,14 @@ Algorithm and outputs
      -> These are the UUIDs which are to be analyzed
      -> Writes out OUTD/DIS/analysis_UUID.dat
      -> Also writes OUTD/DIS/analysis_SN.dat, with the fields "sample_name, case, disease, UUID"
-  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
-     -> Writes out OUTD/DIS/download_UUID.dat
+
+It is expected that the script src/get_download_UUID.sh will be run following this one
 EOF
 
 UUID_COL="12"
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":hd:c:a:b:o:s:f:G:D" opt; do
+while getopts ":hd:c:a:o:s:f:G:D" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -70,9 +69,6 @@ while getopts ":hd:c:a:b:o:s:f:G:D" opt; do
       ;;
     a) 
       DAS="$OPTARG"
-      ;;
-    b) 
-      BAMMAP="$OPTARG"
       ;;
     o) 
       OUTD="$OPTARG"
@@ -126,16 +122,6 @@ if [ -z $DAS ]; then
 fi
 if [ ! -e $DAS ] ; then
     >&2 echo ERROR: File not found: DAS $DAS 
-    exit
-fi
-
-if [ -z $BAMMAP ]; then
-    >&2 echo ERROR: -b BAMMAP
-    >&2 echo "$USAGE"
-    exit
-fi
-if [ ! -e $BAMMAP ] ; then
-    >&2 echo ERROR: File not found: BAMMAP $BAMMAP 
     exit
 fi
 
@@ -226,13 +212,4 @@ CMD="fgrep -f $OUT_ANALYSIS $CATALOG | cut -f 1,2,3,11 | sort > $OUT_ANALYSIS_SN
 eval $CMD
 test_exit_status
 report $OUT_ANALYSIS_SN
-
-#  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
-#     -> Writes out OUTD/DIS/download_UUID.dat
-OUT_DOWNLOAD_UUID="$OUTD/$DIS/download_UUID.dat"
-CMD="comm -23 $OUT_ANALYSIS <(cut -f 10 $BAMMAP | sort) > $OUT_DOWNLOAD_UUID"
->&2 echo Running: $CMD
-eval $CMD
-test_exit_status
-report $OUT_DOWNLOAD_UUID
 

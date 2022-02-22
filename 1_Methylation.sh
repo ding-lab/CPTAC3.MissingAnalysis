@@ -10,4 +10,4 @@ echo Summary
 echo Methylation UUIDs to run
 wc -l $OUTD/*/analysis_SN.dat
 echo Methylation files to download
-wc -l $OUTD/*/download_UUID.dat
+wc -l $OUTD/*/download_UUID.*.dat

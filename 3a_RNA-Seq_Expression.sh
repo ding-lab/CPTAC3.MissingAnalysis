@@ -10,4 +10,4 @@ echo Summary
 echo RNA-Seq Expression UUID to run
 wc -l $OUTD/*/analysis_SN.dat
 echo RNA-Seq Expression files to download
-wc -l $OUTD/*/download_UUID.dat
+wc -l $OUTD/*/download_UUID.*.dat
