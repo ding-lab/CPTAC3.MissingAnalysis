@@ -6,10 +6,10 @@ DCC_UUID_COL="14"
 SYSTEM="katmai"
 
 # Processing miRNA-Seq data.  Typically on katmai
-# Will be looking for non-aligned (not hg38) miRNA-Seq data
+# Looking for harmonized (hg38) miRNA-Seq data
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/miRNA-Seq.DCC_analysis_summary.dat"
 BAMMAP="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/BamMap/${SYSTEM}.BamMap.dat"
-CATALOG_FILTER="grep \"miRNA-Seq\" | grep -v hg38"
+CATALOG_FILTER="grep \"miRNA-Seq\" | grep hg38"
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/CPTAC3.Catalog.dat"
 
 # General scripts
