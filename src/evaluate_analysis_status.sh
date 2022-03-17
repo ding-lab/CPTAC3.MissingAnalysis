@@ -114,12 +114,6 @@ function run_cmd {
     fi
 }
 
-if [ "$#" -ne 0 ]; then
-    >&2 echo Error: Wrong number of arguments
-    echo "$USAGE"
-    exit 1
-fi
-
 # General scripts
 
 if [ -z $DIS ]; then
