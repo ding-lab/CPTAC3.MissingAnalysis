@@ -8,7 +8,7 @@ SYSTEM="storage1"
 # Processing WGS hg38 on storage1
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/WGS_CNV_Somatic.DCC_analysis_summary.dat"
 BAMMAP="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/BamMap/${SYSTEM}.BamMap.dat"
-CATALOG_FILTER="grep WGS | grep hg38 | grep -v tissue_normal"
+CATALOG_FILTER="grep WGS | grep hg38 | grep -v tissue_normal"  # We don't care about tissue normal, only blood normal
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/CPTAC3.Catalog.dat"
 
 # General scripts

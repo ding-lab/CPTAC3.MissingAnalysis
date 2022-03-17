@@ -3,7 +3,7 @@
 # Pipeline-specific definitions
 # here, specify which columns in DCC analysis summary files have the UUIDs
 DCC_UUID_COL="13,15"
-SYSTEM="katmai"
+SYSTEM="storage1"
 
 # Processing RNA-Seq FASTQs on katmai
 # Will be looking for genomic (hg38) RNA-Seq data 

@@ -8,7 +8,7 @@ SYSTEM="MGI"
 # Processing WXS hg38 on MGI
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/WXS_Germline.DCC_analysis_summary.dat"
 BAMMAP="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/BamMap/${SYSTEM}.BamMap.dat"
-CATALOG_FILTER="grep WXS | grep hg38 | grep blood_normal"
+CATALOG_FILTER="grep WXS | grep hg38 | grep normal | grep -v tissue_normal "    # normal will work for AML as well
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/CPTAC3.Catalog.dat"
 
 # General scripts

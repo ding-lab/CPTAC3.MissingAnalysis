@@ -3,7 +3,7 @@ OUTD="dat/RNA-Seq_Transcript"
 
 while read DIS; do
     echo Running $DIS
-    bash src/evaluate_RNA-Seq_Transcript.sh $DIS $OUTD
+    bash src/evaluate_RNA-Seq_Transcript.sh $DIS $OUTD IGNORE_PAST_RUNS
 done <$DISEASES_FN
 
 echo Summary

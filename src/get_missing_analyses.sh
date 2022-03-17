@@ -10,7 +10,7 @@ Options (all options required):
 -h: Print this help message
 -d DIS : Disease. e.g., LUAD
 -c CATALOG: Path to catalog file.  
--a DAS: Path to data analysis summary file
+-a DAS: Path to data analysis summary file.  If not defined, assume nothing analyzed
 -o OUTD: Output directory
 -s CASES: Path to file listing cases of interest
 -f CATALOG_FILTER: string used to filter contents of catalog file for this analysis.  See below
@@ -116,11 +116,9 @@ if [ ! -e $CATALOG ] ; then
 fi
 
 if [ -z $DAS ]; then
-    >&2 echo ERROR: -a DAS
-    >&2 echo "$USAGE"
-    exit
-fi
-if [ ! -e $DAS ] ; then
+    >&2 echo NOTE: DAS not defined, assuming no analyses performed
+elif [ ! -e $DAS ] ; then
+    # if it is defined then it must exist
     >&2 echo ERROR: File not found: DAS $DAS 
     exit
 fi
@@ -188,12 +186,20 @@ test_exit_status
 report $UUIDS_OF_INTEREST
 
 #  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
+#     If DAS not defined, assume that nothing has been analyzed
 OUT_ANALYZED="$OUTD/$DIS/analyzed_UUID.dat"
-CMD="awk -v dis=$DIS 'BEGIN{FS=\"\t\";OFS=\"\t\"}{if (\$2 == dis ) print }' $DAS | cut -f $UUID_COL | tr '\t' '\n' | sort -u > $OUT_ANALYZED"
->&2 echo Running: $CMD
-eval $CMD
-test_exit_status
-report $OUT_ANALYZED 
+if [ -z $DAS ]; then
+    >&2 echo Analysis summary file not defined, assuming nothing analyzed.
+    touch $OUT_ANALYZED
+    eval $CMD
+    test_exit_status
+else
+    CMD="awk -v dis=$DIS 'BEGIN{FS=\"\t\";OFS=\"\t\"}{if (\$2 == dis ) print }' $DAS | cut -f $UUID_COL | tr '\t' '\n' | sort -u > $OUT_ANALYZED"
+    >&2 echo Running: $CMD
+    eval $CMD
+    test_exit_status
+    report $OUT_ANALYZED 
+fi
 
 #  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
 #     -> These are the UUIDs which are to be analyzed

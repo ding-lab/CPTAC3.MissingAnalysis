@@ -18,13 +18,7 @@ function process {
 }
 
 cat << EOF > $DISEASES_FN
-CCRCC
-GBM
-HNSCC
-LSCC
-LUAD
-PDA
-UCEC
+AML
 EOF
 
 >&2 echo Written to $DISEASES_FN

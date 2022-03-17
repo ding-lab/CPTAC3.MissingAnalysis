@@ -3,7 +3,7 @@
 # Pipeline-specific definitions
 # here, specify which columns in DCC analysis summary files have the UUIDs
 DCC_UUID_COL="12,14"
-SYSTEM="storage1"
+SYSTEM="MGI"  # for now, download to MGI so available for other pipelines there
 
 # Processing WXS hg38 on storage1
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/WXS_Somatic_Variant_TD.DCC_analysis_summary.dat"
