@@ -1,7 +1,7 @@
 # Create collected files for all analyses 
 
 PIPELINES="
-Methylation \
+Methylation_Array \
 RNA-Seq_Expression \
 RNA-Seq_Fusion \
 RNA-Seq_Transcript \

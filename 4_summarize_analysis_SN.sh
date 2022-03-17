@@ -1,5 +1,5 @@
 # Methylation: count only Green files (so no double count)
-P=Methylation
+P=Methylation_Array
 echo $P:
 DAT="dat/summary/${P}.analysis_SN.dat"
 grep Green $DAT | cut -f 3 | sort | uniq -c 
