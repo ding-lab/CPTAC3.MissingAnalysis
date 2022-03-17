@@ -1,13 +1,2 @@
-DISEASES_FN="dat/diseases.dat"
-OUTD="dat/RNA-Seq_Fusion"
-
-while read DIS; do
-    echo Running $DIS
-    bash src/evaluate_RNA-Seq_Fusion.sh $DIS $OUTD IGNORE_PAST_RUNS
-done <$DISEASES_FN
-
-echo Summary
-echo RNA-Seq Fusion UUID to run
-wc -l $OUTD/*/analysis_SN.dat
-echo RNA-Seq Fusion files to download
-wc -l $OUTD/*/download_UUID.*.dat
+CONFIG="config/C3b_RNA-Seq_Fusion.sh"
+bash run_pipeline.sh $CONFIG
