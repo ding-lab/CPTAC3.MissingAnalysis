@@ -1,10 +1,4 @@
 
-#PIPELINE="RNA-Seq_Expression"
-#SYSTEM="storage1"
-#DCC_UUID_COL="12" 
-#CATALOG_FILTER="grep \"RNA-Seq\" | grep -v miRNA | grep genomic"
-#SKIP_DAS=1 - should be 0 or 1
-
 # Usage: run_pipeline.sh config_script.sh
 
 # This will run script with the following definitions, which will then be used to remainder
