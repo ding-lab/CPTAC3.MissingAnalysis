@@ -14,11 +14,13 @@ ARGS=" \
 --pipeline 'Somatic v1.2' \
 --experimental_strategy WXS
 "
+OUTFN="dat/paired.run_list-canonical.dat"
+mkdir -p dat
 
 CASES="C3L-00016 C3L-00017"
 #CASES="C3L-00017"
 
-CMD="$PYTHON ../src/make_canonical_run_list.py $@ $ARGS $CASES"
+CMD="$PYTHON ../src/make_canonical_run_list.py $@ -o $OUTFN $ARGS $CASES"
 >&2 echo Running: $CMD
 eval $CMD
 

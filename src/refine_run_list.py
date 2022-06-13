@@ -125,39 +125,43 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # get list of uuids1 and optionally uuids2 to exclude
-    uuid_df = pd.read_csv(uuid_fn, sep="\t")
+    uuid_df = pd.read_csv(args.uuid_fn, sep="\t").drop_duplicates()
     if len(uuid_df.columns) == 1:
         is_paired = False
-        uuid1 = uuid_df[0].tolist()
+        uuids = uuid_df.iloc[:,0].tolist()
     elif len(uuid_df.columns) == 2:
         is_paired = True
-        uuid1 = uuid_df[0].tolist()
-        uuid2 = uuid_df[1].tolist()
+        uuids = []
+        for index, row in uuid_df.iterrows():
+            uuids.append( (row[0], row[1]))
     else:
         raise ValueError('Unexpedted number of columns in '+ uuid_fn)
 
     # get run_list object
-    run_list = pd.read_csv(in_run_list, sep="\t")
+    run_list = pd.read_csv(args.in_run_list, sep="\t")
     new_run_list = pd.DataFrame(columns=run_list.columns)
 
     for index, row in run_list.iterrows():
         retain=True
-        if row['dataset1_uuid'] in uuid1:
-            retain=False
-        if is_paired and row['dataset2_uuid'] in uuid2:
-            retain=False
+        if not is_paired:
+            if row.iloc[3] in uuids:
+                retain=False
+        else:
+            if (row.iloc[3], row.iloc[5]) in uuids:
+                retain=False
+
         if args.debug:
             if retain:
-                eprint("RETAIN : " + str(row))
+                eprint("\nRETAIN : \n" + str(row))
             else:
-                eprint("EXCLUDE: " + str(row))
+                eprint("\nEXCLUDE: \n" + str(row))
         if retain:
             new_run_list = new_run_list.append(row)
 
     if args.outfn == "stdout":
         o = sys.stdout
     else:
-        print("Writing catalog to " + args.outfn)
+        eprint("Writing catalog to " + args.outfn)
         o = open(args.outfn, "w")
 
     new_run_list.to_csv(o, sep="\t", index=False)

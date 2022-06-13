@@ -1,0 +1,3 @@
+# case	disease	pipeline_name	pipeline_version	timestamp	C3Y	DCC_path	filesize	file_format	md5sum	Tumor_Sample_Name	Tumor_BAM_UUID	Normal_Sample_Name	Normal_BAM_UUID
+C3L-00017	PDA	WXS_MSI_fake	v1.3	20200810	Y3	demo/C3L-00017.MSI.WXS.dat	61	DAT	0be8d3db78fae31fe12947bf85bd5a98	C3L-00017.WXS.T.hg38	83ea0e10-82b1-4092-b8a4-770e179ef4cd	C3L-00017.WXS.N.hg38	f99797be-7884-4f95-9052-7637fe7de122
+C3L-00017	PDA	WXS_MSI_fake	v1.3	20200810	Y3	demo/C3L-00017.sites.tsv	184	TSV	c5402eaccd385613b190603a41c7959b	C3L-00017.WXS.T.hg38	83ea0e10-82b1-4092-b8a4-770e179ef4cd	C3L-00017.WXS.N.hg38	f99797be-7884-4f95-9052-7637fe7de122
