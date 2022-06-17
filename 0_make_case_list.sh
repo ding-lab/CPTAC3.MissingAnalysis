@@ -18,7 +18,8 @@ function process {
 }
 
 cat << EOF > $DISEASES_FN
-AML
+GBM
+PDA
 EOF
 
 >&2 echo Written to $DISEASES_FN

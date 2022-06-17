@@ -30,6 +30,7 @@ perform even when some analyses have been performed for that case
 Algorithm and outputs
   1. we are given list of cases of interest (-s CASES_FN)
   2. read configuration parameters from PIPELINE_CONFIG_FN
+	 * process all lines in config file which match pipeline.  This allows for better control with multiple sample types
   3. Generate canonical run_list for cases of interest
     * for paired workflows, for one case, with M sample1 and N sample2, canonical run_list will consist of 
       MxN runs
@@ -140,67 +141,74 @@ function test_exit_status {
 mkdir -p $OUTD
 test_exit_status 
 
-PIPELINE_DETS=$(grep $PIPELINE_NAME $PIPELINE_CONFIG_FN)
-test_exit_status 
-if [ -z "$PIPELINE_DETS" ]; then
-    >&2 echo ERROR: Pipeline info for $PIPELINE_NAME not found in $PIPELINE_CONFIG_FN
-    exit 1
-fi
-#     1	pipeline
-#     2	alignment
-#     3	experimental_strategy
-#     4	data_format
-#     5	data_variety
-#     6	data_variety2
-#     7	sample_type
-#     8	sample_type2
-#     9	label1
-#    10	label2
-#    11	uuid_col
+# Iterate over all lines in pipeline configuration file and process any that exists
 
-PIPELINE=$(echo "$PIPELINE_DETS" | cut -f 1)
-ALIGNMENT=$(echo "$PIPELINE_DETS" | cut -f 2)
-EXPERIMENTAL_STRATEGY=$(echo "$PIPELINE_DETS" | cut -f 3)
-DATA_FORMAT=$(echo "$PIPELINE_DETS" | cut -f 4)
-DATA_VARIETY=$(echo "$PIPELINE_DETS" | cut -f 5)
-DATA_VARIETY2=$(echo "$PIPELINE_DETS" | cut -f 6)
-SAMPLE_TYPE=$(echo "$PIPELINE_DETS" | cut -f 7)
-SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 8)
-LABEL1=$(echo "$PIPELINE_DETS" | cut -f 9)
-LABEL2=$(echo "$PIPELINE_DETS" | cut -f 10)
-UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 11)
-IS_PAIRED=$(echo "$PIPELINE_DETS" | cut -f 12)
-
-#    parser.add_argument("-d", "--debug", action="store_true", help="Print debugging information to stderr")
-#    parser.add_argument("-C", "--catalog", dest="catalog_fn", help="Catalog file name", required=True)
-#    parser.add_argument("-o", "--output", dest="outfn", default="stdout", help="Output file name.  Default writes to stdout")
-#    parser.add_argument("-a", "--alignment", help="Alignment of datasets, e.g., 'harmonized'")
-#    parser.add_argument("-e", "--experimental_strategy", help="Experimental strategy of datasets, e.g., 'WGS'")
-#    parser.add_argument("-f", "--data_format", help="Data format of datasets, e.g., 'BAM'")
-#    parser.add_argument("-v", "--data_variety", help="Data variety of dataset, e.g., 'genomic'")
-#    parser.add_argument("-V", "--data_variety2", help="Data variety of dataset 2, if different")
-#    parser.add_argument("-t", "--sample_type", required=True, help="Comma-separated list of sample types for sample1")
-#    parser.add_argument("-T", "--sample_type2", help="Comma-separated list of sample types for sample2.  Implies paired workflow")
-#    parser.add_argument("-l", "--label1", default="dataset1", help="Label used for this dataset, e.g., 'tumor'")
-#    parser.add_argument("-L", "--label2", default="dataset2", help="Label used for this dataset, e.g., 'normal'")
-#    parser.add_argument("-p", "--pipeline", help="Target pipeline name")
-#    parser.add_argument('cases', nargs='+', help="Cases to be evaluated")
-
+# We delete this file if it exists because make_canonical_run_list.py will append to existing files
 CRL="$OUTD/canonical_run_list.dat"
+rm -f $CRL
+test_exit_status 
+PROCESSED=0		# flag indicating if pipeline was processed at least once
+
 CASES=$(cat $CASES_FN)
 
-ARGS="-C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -v $DATA_VARIETY -t $SAMPLE_TYPE -l $LABEL1 -p $PIPELINE"
-if [ $IS_PAIRED == "1" ]; then
-    if [ ! -z $DATA_VARIETY2 ]; then
-        ARGS="$ARGS -V $DATA_VARIETY2"
-    fi
-    ARGS="$ARGS -T $SAMPLE_TYPE2 -L $LABEL2"
-fi
+while read PIPELINE_DETS; do
+	PN=$(echo "$PIPELINE_DETS" | cut -f 1)
 
-CMD="$PYTHON src/make_canonical_run_list.py $ARGS $CASES"
->&2 echo Running: $CMD
-eval $CMD
-test_exit_status
+	if [ $PN != $PIPELINE_NAME ]; then
+		continue
+	fi
+	PROCESSED=1
+
+	ALIGNMENT=$(echo "$PIPELINE_DETS" | cut -f 2)
+	EXPERIMENTAL_STRATEGY=$(echo "$PIPELINE_DETS" | cut -f 3)
+	DATA_FORMAT=$(echo "$PIPELINE_DETS" | cut -f 4)
+	DATA_VARIETY=$(echo "$PIPELINE_DETS" | cut -f 5)
+	DATA_VARIETY2=$(echo "$PIPELINE_DETS" | cut -f 6)
+	SAMPLE_TYPE=$(echo "$PIPELINE_DETS" | cut -f 7)
+	SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 8)
+	LABEL1=$(echo "$PIPELINE_DETS" | cut -f 9)
+	LABEL2=$(echo "$PIPELINE_DETS" | cut -f 10)
+	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 11)
+	IS_PAIRED=$(echo "$PIPELINE_DETS" | cut -f 12 )
+	SUFFIX=$(echo "$PIPELINE_DETS" | cut -f 13 )
+
+	ARGS="-C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE -p $PIPELINE_NAME"
+    
+	if [ $DATA_VARIETY != "." ]; then
+		ARGS="$ARGS -v $DATA_VARIETY"
+	fi
+	if [ $LABEL1 != "." ]; then
+		ARGS="$ARGS -l $LABEL1"
+	fi
+	if [ $SUFFIX != "." ]; then
+		ARGS="$ARGS -R $SUFFIX"
+	fi
+
+	if [ "$IS_PAIRED" == 1 ]; then
+		if [ $DATA_VARIETY2 != "." ]; then
+			ARGS="$ARGS -V $DATA_VARIETY2"
+		fi
+		if [ $SAMPLE_TYPE2 != "." ]; then
+			ARGS="$ARGS -T $SAMPLE_TYPE2"
+		else
+			ARGS="$ARGS -T $SAMPLE_TYPE"
+		fi
+		if [ $LABEL2 != "." ]; then
+			ARGS="$ARGS -L $LABEL2"
+		fi
+	fi
+
+	CMD="$PYTHON src/make_canonical_run_list.py $ARGS $CASES"
+	>&2 echo Running: $CMD
+	eval $CMD
+	test_exit_status
+
+done <$PIPELINE_CONFIG_FN
+
+if [ $PROCESSED == 0 ]; then
+	>&2 echo ERROR: Pipeline $PIPELINE_NAME not found in $PIPELINE_CONFIG_FN
+	exit 1
+fi
 
 OUT_ANALYSIS="$OUTD/request_run_list.dat"
 #  3. Get all UUIDs which have been analyzed (analyzed UUIDs), possibly paired
@@ -213,7 +221,6 @@ else
     OUT_ANALYZED="$OUTD/analyzed_UUIDs.dat"
     # Note that we need to retain the header and it doesn't necessarily sort right
     CMD="head -n1 $DAS | cut -f $UUID_COL >  $OUT_ANALYZED && tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
-    >&2 echo Running: $CMD
     eval $CMD
     test_exit_status
 

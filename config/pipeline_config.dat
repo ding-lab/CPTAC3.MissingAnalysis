@@ -1,2 +1,0 @@
-pipeline	alignment	experimental_strategy	data_format	data_variety	data_variety2	sample_type	sample_type2	label1	label2	uuid_col	is_paired
-RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	.	tumor,tissue_normal	.	sample	.	12	0
