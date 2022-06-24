@@ -6,9 +6,10 @@
 #DAS: Path to data analysis summary file.  If not defined, request run list is canonical run list
 
 PIPELINE_NAME="Methylation_Array"
-CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
+#CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
+CATALOG="config/CPTAC3.Catalog3-short.tsv"
 OUTD="dat/$PIPELINE_NAME"
-CASES_FN="config/cases.dat"
+CASES_FN="config/test-cases.dat"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
 

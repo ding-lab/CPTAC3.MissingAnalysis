@@ -99,7 +99,7 @@ if [ -z $CASES_FN ]; then
     exit 1
 fi
 if [ ! -e $CASES_FN ] ; then
-    >&2 echo ERROR: File not found: CASES_FN $CASES_FN 
+    >&2 echo ERROR: File not found: $CASES_FN 
     exit 1
 fi
 
@@ -163,40 +163,25 @@ while read PIPELINE_DETS; do
 	EXPERIMENTAL_STRATEGY=$(echo "$PIPELINE_DETS" | cut -f 3)
 	DATA_FORMAT=$(echo "$PIPELINE_DETS" | cut -f 4)
 	DATA_VARIETY=$(echo "$PIPELINE_DETS" | cut -f 5)
-	DATA_VARIETY2=$(echo "$PIPELINE_DETS" | cut -f 6)
-	SAMPLE_TYPE=$(echo "$PIPELINE_DETS" | cut -f 7)
-	SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 8)
-	LABEL1=$(echo "$PIPELINE_DETS" | cut -f 9)
-	LABEL2=$(echo "$PIPELINE_DETS" | cut -f 10)
-	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 11)
-	IS_PAIRED=$(echo "$PIPELINE_DETS" | cut -f 12 )
-	SUFFIX=$(echo "$PIPELINE_DETS" | cut -f 13 )
+	SAMPLE_TYPE=$(echo "$PIPELINE_DETS" | cut -f 6)
+	SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 7)
+	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 8)
 
-	ARGS="-C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE -p $PIPELINE_NAME"
+    # for testing output to stdout
+	ARGS="-C $CATALOG -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
+	#ARGS="-C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
     
 	if [ $DATA_VARIETY != "." ]; then
 		ARGS="$ARGS -v $DATA_VARIETY"
 	fi
-	if [ $LABEL1 != "." ]; then
-		ARGS="$ARGS -l $LABEL1"
-	fi
-	if [ $SUFFIX != "." ]; then
-		ARGS="$ARGS -R $SUFFIX"
-	fi
 
-	if [ "$IS_PAIRED" == 1 ]; then
-		if [ $DATA_VARIETY2 != "." ]; then
-			ARGS="$ARGS -V $DATA_VARIETY2"
-		fi
+#	if [ "$IS_PAIRED" == 1 ]; then
 		if [ $SAMPLE_TYPE2 != "." ]; then
 			ARGS="$ARGS -T $SAMPLE_TYPE2"
-		else
-			ARGS="$ARGS -T $SAMPLE_TYPE"
+#		else
+#			ARGS="$ARGS -T $SAMPLE_TYPE"
 		fi
-		if [ $LABEL2 != "." ]; then
-			ARGS="$ARGS -L $LABEL2"
-		fi
-	fi
+#	fi
 
 	CMD="$PYTHON src/make_canonical_run_list.py $ARGS $CASES"
 	>&2 echo Running: $CMD
