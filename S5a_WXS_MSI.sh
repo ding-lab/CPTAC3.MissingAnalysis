@@ -5,13 +5,11 @@
 #PIPELINE_CONFIG_FN: configuration file with per-pipeline definitions.  Required
 #DAS: Path to data analysis summary file.  If not defined, request run list is canonical run list
 
-# For now, doing just PDA MSI
-
 PIPELINE_NAME="WXS_MSI"
-CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
+#CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
+CATALOG="config/CPTAC3.Catalog3-short.tsv"
 OUTD="dat/$PIPELINE_NAME"
-CASES_FN="dat/cases/PDA.dat"
-#CASES_FN="config/test-cases.dat"
+CASES_FN="config/test-cases.dat"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
 

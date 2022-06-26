@@ -8,6 +8,7 @@ Usage:
 
 Options (all options required):
 -h: Print this help message
+-d: print debug messages
 -C CATALOG: Path to catalog3 file. Required 
 -o OUTD: Output directory.  Required.  May be per-disease
 -s CASES_FN: Path to file listing cases of interest.  Required
@@ -43,11 +44,14 @@ EOF
 PYTHON="python3"
 XARGS="" # arguments passed to make_canonical_run_list.py
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":hC:o:s:p:P:D:" opt; do
+while getopts ":hdC:o:s:p:P:D:" opt; do
   case $opt in
     h)
       echo "$USAGE"
       exit 0
+      ;;
+    d)
+      DEBUG="-d"
       ;;
     C) 
       CATALOG="$OPTARG"
@@ -167,21 +171,15 @@ while read PIPELINE_DETS; do
 	SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 7)
 	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 8)
 
-    # for testing output to stdout
-	ARGS="-C $CATALOG -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
-	#ARGS="-C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
+	ARGS="$DEBUG -C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
     
 	if [ $DATA_VARIETY != "." ]; then
 		ARGS="$ARGS -v $DATA_VARIETY"
 	fi
 
-#	if [ "$IS_PAIRED" == 1 ]; then
-		if [ $SAMPLE_TYPE2 != "." ]; then
-			ARGS="$ARGS -T $SAMPLE_TYPE2"
-#		else
-#			ARGS="$ARGS -T $SAMPLE_TYPE"
-		fi
-#	fi
+    if [ $SAMPLE_TYPE2 != "." ]; then
+        ARGS="$ARGS -T $SAMPLE_TYPE2"
+    fi
 
 	CMD="$PYTHON src/make_canonical_run_list.py $ARGS $CASES"
 	>&2 echo Running: $CMD
