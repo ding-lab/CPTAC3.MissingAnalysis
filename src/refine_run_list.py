@@ -125,6 +125,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # get list of uuids1 and optionally uuids2 to exclude
+    # TODO: catch this error and handle it gracefully:
+    #    pandas.errors.EmptyDataError: No columns to parse from file
     uuid_df = pd.read_csv(args.uuid_fn, sep="\t").drop_duplicates()
     if len(uuid_df.columns) == 1:
         is_paired = False
