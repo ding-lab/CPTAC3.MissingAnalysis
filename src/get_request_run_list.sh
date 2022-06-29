@@ -169,7 +169,8 @@ while read PIPELINE_DETS; do
 	DATA_VARIETY=$(echo "$PIPELINE_DETS" | cut -f 5)
 	SAMPLE_TYPE=$(echo "$PIPELINE_DETS" | cut -f 6)
 	SAMPLE_TYPE2=$(echo "$PIPELINE_DETS" | cut -f 7)
-	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 8)
+	SUFFIX=$(echo "$PIPELINE_DETS" | cut -f 8)
+	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 9)
 
 	ARGS="$DEBUG -C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
     
@@ -179,6 +180,10 @@ while read PIPELINE_DETS; do
 
     if [ $SAMPLE_TYPE2 != "." ]; then
         ARGS="$ARGS -T $SAMPLE_TYPE2"
+    fi
+
+    if [ $SUFFIX != "." ]; then
+        ARGS="$ARGS -s $SUFFIX"
     fi
 
 	CMD="$PYTHON src/make_canonical_run_list.py $ARGS $CASES"

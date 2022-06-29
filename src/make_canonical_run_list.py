@@ -37,8 +37,7 @@ def get_datafile_list(catalog, cases, sample_types=[], alignment=None, experimen
     experimental_strategy_loc = (cat['experimental_strategy'] == experimental_strategy) if experimental_strategy is not None else True
     data_format_loc = (cat['data_format'] == data_format) if data_format is not None else True
 
-    # here need to so substring match, e.g. R1 will match S1_L003_R1
-    data_variety_loc = (cat['data_variety'] == data_variety) if data_variety is not None else True
+    data_variety_loc = (cat['data_variety'].str.contains(data_variety)) if data_variety is not None else True
     all_loc = case_loc & sample_types_loc & experimental_strategy_loc & alignment_loc & data_format_loc & data_variety_loc
 
     # all_loc selects the rows of interest.  Now extract from metadata particular fields to catalog to make processing later easier
@@ -90,26 +89,17 @@ def get_compound_dataset_list(catalog, cases, sample_types, alignment, experimen
         raise ValueError("Unmatched datafile")
         
     datafiles = flM.to_dict("records") 
-    # this returns a list of dictionaries, e.g., {'datafile_name_A': 'C3N-01200.DUP_6b3a9db.MethArray.Red.T', 'uuid_A': 'b76ec06c-d83c-4147-9651-07b7ac4500ae', 'case': 'C3N-01200', 'aliquot_tag': 'DUP_6b3a9db', 'datafile_name_B': 'C3N-01200.DUP_6b3a9db.MethArray.Green.T', 'uuid_B': 'd258d649-b531-429f-a9aa-407f445dcf13'}
-    # want to return (['datafile_name_A', 'aliquot_tag', 'case', 'uuid_A'], ['datafile_name_A', 'aliquot_tag', 'case', 'uuid_A']), (...)
-
-    
-    # return( cat.loc[all_loc, ['datafile_name', 'uuid', 'case', 'aliquot_tag']])
-    #l = lambda d: ([ d['datafile_name_A'], d['aliquot_tag'], d['case'], d['uuid_A'] ],  [ d['datafile_name_B'], d['aliquot_tag'], d['case'], d['uuid_B'] ])
     l = lambda d: ([ d['datafile_name_A'], d['uuid_A'], d['case'], d['aliquot_tag'] ],  [ d['datafile_name_B'], d['uuid_B'], d['case'], d['aliquot_tag'] ])
     run_list = list( map(l, datafiles) )
 
     return run_list
-        
-
-
 
 # run_name is the case name with aliquot tags appended for any datasets with multiplicity > 1
-def get_run_name(case, aliquot1_tag, multiples_ds1, run_suffix = None, aliquot2_tag = None, multiples_ds2 = None):
+def get_run_name(case, aliquot1_tag, multiples_ds1, suffix = None, aliquot2_tag = None, multiples_ds2 = None):
     # ds columns: ['dataset_name', 'uuid', 'case', 'aliquot_tag']])
     run_name = case
-    if run_suffix is not None:
-        run_name = run_name + '.' + run_suffix
+    if suffix is not None:
+        run_name = run_name + '.' + suffix
     if multiples_ds1 > 1:
         run_name = run_name + '.' + aliquot1_tag
     if aliquot2_tag is not None:
@@ -143,21 +133,19 @@ def get_paired_runset(ds1, ds2):
 # * dataset2_uuid
 # this works only for one case at a time right now
 
-def get_two_column_run_list(rs, pipeline_info):
+def get_two_column_run_list(rs, pipeline_info, suffix=None):
 
-    suffix = pipeline_info['run_suffix'] if 'run_suffix' in pipeline_info else None
+#    suffix = pipeline_info['suffix'] if 'suffix' in pipeline_info else None
 # https://stackoverflow.com/questions/45672342/create-a-dataframe-of-permutations-in-pandas-from-list
     run_list = pd.DataFrame(columns=["run_name", "run_metadata", "dataset1_name", "dataset1_uuid", "dataset2_name", "dataset2_uuid"])
     for r in rs:
         rs1 = r[0]
         rs2 = r[1]
 
-#def get_run_name(case, aliquot1_tag, multiples_ds1, run_suffix = None, aliquot2_tag = None, multiples_ds2 = None):
-        # for MSI getting ['C3N-01200.DUP_6b3a9db.WXS.T.hg38', '85922135-ab55-4c2b-9a78-371f22aae54e', 'C3N-01200', 'DUP_6b3a9db']
         n1 = pipeline_info['multiples_ds1'] if 'multiples_ds1' in pipeline_info.keys() else 1
         n2 = pipeline_info['multiples_ds2'] if 'multiples_ds2' in pipeline_info.keys() else 1
 
-        run_name = get_run_name(rs1[2], rs1[3], n1, run_suffix = suffix, aliquot2_tag = rs2[3], multiples_ds2 = n2)
+        run_name = get_run_name(rs1[2], rs1[3], n1, suffix = suffix, aliquot2_tag = rs2[3], multiples_ds2 = n2)
         # note that run_metadata currently has value of case.  This needs to be updated
         row={"run_name": run_name, "run_metadata": rs1[2], "dataset1_name": rs1[0], "dataset1_uuid": rs1[1], "dataset2_name": rs2[0], "dataset2_uuid":  rs2[1]}
 
@@ -178,23 +166,24 @@ def get_two_column_run_list(rs, pipeline_info):
 #   * target_pipeline - optional
 #   * label1 - common name for dataset1, e.g. "tumor" (and label2 would be "normal")
 
-def get_single_column_run_list(dl, pipeline_info):
+def get_single_column_run_list(rs, pipeline_info, suffix=None):
 #    run_list is catalog.loc[all_loc, ['dataset_name', 'uuid', 'case', 'aliquot_tag']]
-    dl = dl.rename(columns={'uuid': 'datafile_uuid'})
-    multiples_ds1 = dl.shape[0]
-#    suffix = pipeline_info['run_suffix']
+    rs = rs.rename(columns={'uuid': 'datafile_uuid'})
+    multiples_ds1 = rs.shape[0]
+#    suffix = pipeline_info['suffix']
 
-    #dl['run_name'] = dl.apply(lambda row: get_run_name(row, multiples_ds1), axis=1 )
-    dl['run_name'] = dl.apply(lambda row: get_run_name(row['case'], row['aliquot_tag'], multiples_ds1), axis=1 )
+    # what about multiples?
+# def get_run_name(case, aliquot1_tag, multiples_ds1, suffix = None, aliquot2_tag = None, multiples_ds2 = None):
+    rs['run_name'] = rs.apply(lambda row: get_run_name(row['case'], row['aliquot_tag'], multiples_ds1, suffix=suffix), axis=1 )
 
     # run_metadata is not implemented.
     # for now, run_metadata is simply the case name
 
     # TODO: create json string based on run_metadata and pipeline_info information
-#    dl['run_metadata'] = dl.apply(lambda row: json.dumps(...), axis=1 )
-    dl = dl.rename(columns={'case': 'run_metadata'})
+#    rs['run_metadata'] = rs.apply(lambda row: json.dumps(...), axis=1 )
+    rs = rs.rename(columns={'case': 'run_metadata'})
 
-    return dl[['run_name', 'run_metadata', 'datafile_name', 'datafile_uuid']].reset_index(drop=True)
+    return rs[['run_name', 'run_metadata', 'datafile_name', 'datafile_uuid']].reset_index(drop=True)
 
 
 if __name__ == "__main__":
@@ -208,7 +197,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--data_variety", help="Data variety of dataset, e.g., 'genomic'.  Multiple values (e.g. 'R1,R2') imply compound dataset consisting of several datafiles")
     parser.add_argument("-t", "--sample_type", required=True, help="Comma-separated list of sample types for sample1")
     parser.add_argument("-T", "--sample_type2", help="Comma-separated list of sample types for sample2.  Implies paired workflow")
-    parser.add_argument("-R", "--run_suffix", help="Additional string to be added to run_name following case name")
+    parser.add_argument("-s", "--suffix", help="Additional string to be added to run_name following case name")
     parser.add_argument('cases', nargs='+', help="Cases to be evaluated")
 
     args = parser.parse_args()
@@ -244,8 +233,8 @@ if __name__ == "__main__":
     #   * target_pipeline - optional
     #   * label1 - common name for dataset1, e.g. "tumor" (and label2 would be "normal")
     pipeline_info = {'is_paired': is_paired_workflow}
-    if args.run_suffix:
-        pipeline_info.update({'run_suffix': args.run_suffix})
+    if args.suffix:
+        pipeline_info.update({'suffix': args.suffix})
 
     # it is easier for a pandas newbie to iterate over all cases rather than process the list whole
     # get_dataset_list works OK with a list of cases
@@ -256,11 +245,15 @@ if __name__ == "__main__":
             dataset_list1 = get_simple_dataset_list(catalog, [case], sample_types, args.alignment, args.experimental_strategy, args.data_format, data_varieties, args.debug)
         else:
             dataset_list1 = get_compound_dataset_list(catalog, [case], sample_types, args.alignment, args.experimental_strategy, args.data_format, data_varieties, args.debug)
-        if (args.debug):
+        if args.debug:
             eprint("dataset_list1")
             eprint(dataset_list1)
-        if (len(dataset_list1) > 1):
+        if len(dataset_list1) > 1:
             pipeline_info.update({'multiples_ds1': len(dataset_list1)})  # for instance, multiple tumor samples
+        elif len(dataset_list1) == 0:
+            if args.debug:
+                eprint("dataset_list1 is empty")
+                continue
 
         if is_paired_workflow:
             if compound_dataset:
@@ -286,9 +279,9 @@ if __name__ == "__main__":
             eprint(runset_list)
 
         if two_column_runlist:
-            rl = get_two_column_run_list(runset_list, pipeline_info)
+            rl = get_two_column_run_list(runset_list, pipeline_info, suffix=args.suffix)
         else:
-            rl = get_single_column_run_list(runset_list, pipeline_info)
+            rl = get_single_column_run_list(runset_list, pipeline_info, suffix=args.suffix)
 
         run_list = run_list.append(rl) if run_list is not None else rl
 
