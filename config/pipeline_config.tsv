@@ -6,8 +6,8 @@ RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	tissue_normal	.	A	12
 WGS_SV	harmonized	WGS	BAM	.	tumor	blood_normal	.	"12,14"
 WGS_CNV_Somatic	harmonized	WGS	BAM	.	tumor	blood_normal	.	"12,14"
 WXS_MSI	harmonized	WXS	BAM	.	tumor	blood_normal	.	"12,14"
-WXS_Somatic_TD	harmonized	WXS	BAM	.	tumor	blood_normal	.	"12,14"
-WXS_Somatic_SW	harmonized	WXS	BAM	.	tumor	blood_normal	.	"12,14"
+WXS_Somatic_Variant_TD	harmonized	WXS	BAM	.	tumor	blood_normal	.	"12,14"
+WXS_Somatic_Variant_SW	harmonized	WXS	BAM	.	tumor	blood_normal	.	"12,14"
 WXS_Germline	harmonized	WXS	BAM	.	blood_normal	.	.	12
 RNA-Seq_Fusion	unaligned	RNA-Seq	FASTQ	"R1,R2"	tumor	.	T	"12,14"
 RNA-Seq_Fusion	unaligned	RNA-Seq	FASTQ	"R1,R2"	tissue_normal	.	A	"12,14"
