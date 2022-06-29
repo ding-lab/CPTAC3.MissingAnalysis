@@ -53,7 +53,6 @@ def get_simple_dataset_list(catalog, cases, sample_types, alignment, experimenta
                 experimental_strategy=experimental_strategy, data_format=data_format, debug=debug)
     return file_list 
 
-
 # datafile keys: ['datafile_name', 'aliquot_tag', 'case', 'uuid']
 # if no data_varieties or only one specified, return the datafile list as the dataset list
 # dataset_list is a list of tuples, [ (dfA1, dfA2), (dfB1, dfB2), ... ] one tuple per aliquot,
@@ -115,45 +114,36 @@ def get_run_name(case, aliquot1_tag, multiples_ds1, suffix = None, aliquot2_tag 
 # for instance, if ds1 consists of datasets T1,T2,T3 and ds2 of N1 and N2, run set would incorporate ( (T1, N1), (T1, N2), (T2, N1), (T2, N2), (T3, N1), (T3, N2) )
     
 def get_paired_runset(ds1, ds2):
-
 # https://stackoverflow.com/questions/45672342/create-a-dataframe-of-permutations-in-pandas-from-list
     rs=list(itertools.product(ds1.values.tolist(), ds2.values.tolist()))
     return rs
 
-
-
-
 # Run list for paired run has the following columns:
 # * run_name
 # * run_data - json with fields: case, target pipeline, multiples_ds1, multiples_ds2
-#   NOTE: this is not implemmented, and currently this field has value of "case"
+#       NOTE: this is not implemmented, and currently this field has value of "case"
 # * dataset1_name
 # * dataset1_uuid
 # * dataset2_name
 # * dataset2_uuid
 # this works only for one case at a time right now
-
-def get_two_column_run_list(rs, pipeline_info, suffix=None):
-
-#    suffix = pipeline_info['suffix'] if 'suffix' in pipeline_info else None
-# https://stackoverflow.com/questions/45672342/create-a-dataframe-of-permutations-in-pandas-from-list
+# n1, n2 is multiples_ds1, multiples_ds2
+def get_two_column_run_list(rs, pipeline_info, n1, n2, suffix=None):
     run_list = pd.DataFrame(columns=["run_name", "run_metadata", "dataset1_name", "dataset1_uuid", "dataset2_name", "dataset2_uuid"])
     for r in rs:
+        # Note that get_one_column version does not iterate over rs, and this probably doesn't ahve to either
         rs1 = r[0]
         rs2 = r[1]
 
-        n1 = pipeline_info['multiples_ds1'] if 'multiples_ds1' in pipeline_info.keys() else 1
-        n2 = pipeline_info['multiples_ds2'] if 'multiples_ds2' in pipeline_info.keys() else 1
+#        n1 = pipeline_info['multiples_ds1'] if 'multiples_ds1' in pipeline_info.keys() else 1
+#        n2 = pipeline_info['multiples_ds2'] if 'multiples_ds2' in pipeline_info.keys() else 1
 
         run_name = get_run_name(rs1[2], rs1[3], n1, suffix = suffix, aliquot2_tag = rs2[3], multiples_ds2 = n2)
         # note that run_metadata currently has value of case.  This needs to be updated
         row={"run_name": run_name, "run_metadata": rs1[2], "dataset1_name": rs1[0], "dataset1_uuid": rs1[1], "dataset2_name": rs2[0], "dataset2_uuid":  rs2[1]}
 
         run_list = run_list.append(row, ignore_index=True)
-#    dl['run_name'] = dl.apply(lambda row: get_run_name(row[0]['case'], row[0]['aliquot_tag'], multiples_ds1, row[1]['aliquot_tag'], multiples_ds2), axis=1 )
-
     return run_list[['run_name', 'run_metadata', 'dataset1_name', 'dataset1_uuid', 'dataset2_name', 'dataset2_uuid']].reset_index(drop=True)
-
 
 # Run list for single run has the following columns:
 # * run_name
@@ -166,25 +156,20 @@ def get_two_column_run_list(rs, pipeline_info, suffix=None):
 #   * target_pipeline - optional
 #   * label1 - common name for dataset1, e.g. "tumor" (and label2 would be "normal")
 
-def get_single_column_run_list(rs, pipeline_info, suffix=None):
+def get_single_column_run_list(rs, pipeline_info, n1, suffix=None):
 #    run_list is catalog.loc[all_loc, ['dataset_name', 'uuid', 'case', 'aliquot_tag']]
     rs = rs.rename(columns={'uuid': 'datafile_uuid'})
-    multiples_ds1 = rs.shape[0]
-#    suffix = pipeline_info['suffix']
+#    n1 = pipeline_info['multiples_ds1'] if 'multiples_ds1' in pipeline_info.keys() else 1
 
-    # what about multiples?
-# def get_run_name(case, aliquot1_tag, multiples_ds1, suffix = None, aliquot2_tag = None, multiples_ds2 = None):
-    rs['run_name'] = rs.apply(lambda row: get_run_name(row['case'], row['aliquot_tag'], multiples_ds1, suffix=suffix), axis=1 )
+    rs['run_name'] = rs.apply(lambda row: get_run_name(row['case'], row['aliquot_tag'], n1, suffix=suffix), axis=1 )
 
     # run_metadata is not implemented.
     # for now, run_metadata is simply the case name
-
     # TODO: create json string based on run_metadata and pipeline_info information
 #    rs['run_metadata'] = rs.apply(lambda row: json.dumps(...), axis=1 )
     rs = rs.rename(columns={'case': 'run_metadata'})
 
     return rs[['run_name', 'run_metadata', 'datafile_name', 'datafile_uuid']].reset_index(drop=True)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate run list for cases of interest from Catalog3 file for single and paired runs ")
@@ -230,8 +215,6 @@ if __name__ == "__main__":
 
     # pipeline data: dictionary of pipeline-associated variables which are appended to run_data
     #   * is_paired (if true, run_list has 2 input datasets, otherwise it has one)
-    #   * target_pipeline - optional
-    #   * label1 - common name for dataset1, e.g. "tumor" (and label2 would be "normal")
     pipeline_info = {'is_paired': is_paired_workflow}
     if args.suffix:
         pipeline_info.update({'suffix': args.suffix})
@@ -248,12 +231,15 @@ if __name__ == "__main__":
         if args.debug:
             eprint("dataset_list1")
             eprint(dataset_list1)
-        if len(dataset_list1) > 1:
-            pipeline_info.update({'multiples_ds1': len(dataset_list1)})  # for instance, multiple tumor samples
-        elif len(dataset_list1) == 0:
+        multiples_ds1 = len(dataset_list1)
+#        if len(dataset_list1) > 1:
+#            pipeline_info.update({'multiples_ds1': len(dataset_list1)})  # for instance, multiple tumor samples
+#        elif len(dataset_list1) == 0:
+
+        if multiples_ds1 == 0:
             if args.debug:
                 eprint("dataset_list1 is empty")
-                continue
+            continue
 
         if is_paired_workflow:
             if compound_dataset:
@@ -264,12 +250,18 @@ if __name__ == "__main__":
                 eprint(dataset_list2)
             runset_list = get_paired_runset(dataset_list1, dataset_list2)
 
-            if (len(dataset_list2) > 1):
-                pipeline_info.update({'multiples_ds2': len(dataset_list2)})  # for instance, multiple tumor samples
+            multiples_ds2 = len(dataset_list2)
+            if multiples_ds2 == 0:
+                if args.debug:
+                    eprint("dataset_list2 is empty")
+                continue
+#            if (len(dataset_list2) > 1):
+#                pipeline_info.update({'multiples_ds2': len(dataset_list2)})  # for instance, multiple tumor samples
 
             two_column_runlist = True
         else:
             runset_list = dataset_list1
+            multiples_ds2 = 1   # there is no ds2
             if compound_dataset:
                 two_column_runlist = True
             else:
@@ -279,9 +271,9 @@ if __name__ == "__main__":
             eprint(runset_list)
 
         if two_column_runlist:
-            rl = get_two_column_run_list(runset_list, pipeline_info, suffix=args.suffix)
+            rl = get_two_column_run_list(runset_list, pipeline_info, multiples_ds1, multiples_ds2, suffix=args.suffix)
         else:
-            rl = get_single_column_run_list(runset_list, pipeline_info, suffix=args.suffix)
+            rl = get_single_column_run_list(runset_list, pipeline_info, multiples_ds1, suffix=args.suffix)
 
         run_list = run_list.append(rl) if run_list is not None else rl
 

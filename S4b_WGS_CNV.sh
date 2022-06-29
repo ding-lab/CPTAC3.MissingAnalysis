@@ -5,7 +5,7 @@
 #PIPELINE_CONFIG_FN: configuration file with per-pipeline definitions.  Required
 #DAS: Path to data analysis summary file.  If not defined, request run list is canonical run list
 
-PIPELINE_NAME="WXS_MSI"
+PIPELINE_NAME="WGS_CNV_Somatic"
 CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
 OUTD="dat/$PIPELINE_NAME"
 CASES_FN="dat/cases/GBM.dat"

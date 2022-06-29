@@ -10,7 +10,7 @@ CATALOG="testing/testdata/C3L-0001x.Catalog3.tsv"
 OUTD="dat/$PIPELINE_NAME"
 CASES_FN="config/test-cases.C3L-0001X.dat"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
-DAS="testing/testdata/unpaired.DCC_analysis_summary.dat"
+DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
 
 # -C CATALOG: Path to catalog3 file. Required 
 # -o OUTD: Output directory.  Required.  May be per-disease
