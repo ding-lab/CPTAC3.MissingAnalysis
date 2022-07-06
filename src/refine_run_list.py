@@ -142,7 +142,7 @@ if __name__ == "__main__":
         for index, row in uuid_df.iterrows():
             uuids.append( (row[0], row[1]))
     else:
-        raise ValueError('Unexpedted number of columns in '+ uuid_fn)
+        raise ValueError('Unexpected number of columns in '+ uuid_fn)
 
     # get run_list object
     run_list = pd.read_csv(args.in_run_list, sep="\t")

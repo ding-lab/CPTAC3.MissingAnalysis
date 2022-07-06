@@ -226,8 +226,10 @@ if __name__ == "__main__":
 
     # it is easier for a pandas newbie to iterate over all cases rather than process the list whole
     # get_dataset_list works OK with a list of cases
-    run_list = None
+    run_list = []   # this will be a list of dataframes
     for case in args.cases:
+        if args.debug:
+            eprint("Processing " + case)
 
         if not compound_dataset:
             dataset_list1 = get_simple_dataset_list(catalog, [case], sample_types, args.alignment, args.experimental_strategy, args.data_format, data_varieties, args.debug)
@@ -280,13 +282,13 @@ if __name__ == "__main__":
         else:
             rl = get_single_column_run_list(runset_list, pipeline_info, multiples_ds1, suffix=args.suffix)
 
-        #run_list = run_list.append(rl) if run_list is not None else rl
-        run_list = pd.concat([run_list, pd.DataFrame.from_records([rl])], ignore_index=True) if run_list is not None else rl
+        run_list.append(rl) 
 
+    run_list_df = pd.concat(run_list, ignore_index=True)
 
     if (args.debug):
-        eprint("rl")
-        eprint(rl)
+        eprint("run_list_df")
+        eprint(run_list_df)
 
     write_header = True
     if args.outfn == "stdout":
@@ -301,5 +303,5 @@ if __name__ == "__main__":
             print("Writing run_list to " + args.outfn)
             o = open(args.outfn, "w")
 
-    run_list.to_csv(o, sep="\t", index=False, header=write_header)
+    run_list_df.to_csv(o, sep="\t", index=False, header=write_header)
 
