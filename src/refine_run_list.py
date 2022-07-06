@@ -163,7 +163,8 @@ if __name__ == "__main__":
             else:
                 eprint("\nEXCLUDE: \n" + str(row))
         if retain:
-            new_run_list = new_run_list.append(row)
+            #new_run_list = new_run_list.append(row)
+            new_run_run_list = pd.concat([new_run_list, pd.DataFrame.from_records([row])], ignore_index=True)
 
     if args.outfn == "stdout":
         o = sys.stdout

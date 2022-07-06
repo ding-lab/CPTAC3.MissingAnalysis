@@ -4,11 +4,12 @@
 PIPELINE_NAME=$1
 DIS=$2
 
-CATALOG="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/Catalog3/CPTAC3.Catalog3.tsv"
+CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
+CATALOG="$CATALOG_ROOT/Catalog3/CPTAC3.Catalog3.tsv"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
-DAS="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
+DAS="$CATALOG_ROOT/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
 
-CASES_FN="dat/cases/$DIS.dat"
+CASES_FN="dat/cases/${DIS}-cases.dat"
 OUTD="dat/results/$PIPELINE_NAME/$DIS"
 mkdir -p $OUTD
 

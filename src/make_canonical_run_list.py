@@ -2,6 +2,9 @@
 # m.wyczalkowski@wustl.edu
 # Washington University School of Medicine
 
+# TODO: Performance improvements.  Don't loop over list and add cases.  Rather, make a dictionary of case data
+# and then join it all at once.
+
 import json
 import argparse, sys, os, itertools
 import pandas as pd
@@ -142,7 +145,9 @@ def get_two_column_run_list(rs, pipeline_info, n1, n2, suffix=None):
         # note that run_metadata currently has value of case.  This needs to be updated
         row={"run_name": run_name, "run_metadata": rs1[2], "dataset1_name": rs1[0], "dataset1_uuid": rs1[1], "dataset2_name": rs2[0], "dataset2_uuid":  rs2[1]}
 
-        run_list = run_list.append(row, ignore_index=True)
+        # run_list = run_list.append(row, ignore_index=True)
+        run_list = pd.concat([run_list, pd.DataFrame.from_records([row])], ignore_index=True)
+
     return run_list[['run_name', 'run_metadata', 'dataset1_name', 'dataset1_uuid', 'dataset2_name', 'dataset2_uuid']].reset_index(drop=True)
 
 # Run list for single run has the following columns:
@@ -275,7 +280,8 @@ if __name__ == "__main__":
         else:
             rl = get_single_column_run_list(runset_list, pipeline_info, multiples_ds1, suffix=args.suffix)
 
-        run_list = run_list.append(rl) if run_list is not None else rl
+        #run_list = run_list.append(rl) if run_list is not None else rl
+        run_list = pd.concat([run_list, pd.DataFrame.from_records([rl])], ignore_index=True) if run_list is not None else rl
 
 
     if (args.debug):
