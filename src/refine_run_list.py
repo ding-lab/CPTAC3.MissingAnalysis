@@ -132,7 +132,7 @@ if __name__ == "__main__":
     except pd.errors.EmptyDataError:
         eprint("ERROR: " + args.uuid_fn + " is empty")
         sys.exit(1)
-#
+
     if len(uuid_df.columns) == 1:
         is_paired = False
         uuids = uuid_df.iloc[:,0].tolist()
@@ -146,6 +146,7 @@ if __name__ == "__main__":
 
     # get run_list object
     run_list = pd.read_csv(args.in_run_list, sep="\t")
+
     new_run_list = pd.DataFrame(columns=run_list.columns)
 
     for index, row in run_list.iterrows():
@@ -164,7 +165,7 @@ if __name__ == "__main__":
                 eprint("\nEXCLUDE: \n" + str(row))
         if retain:
             #new_run_list = new_run_list.append(row)
-            new_run_run_list = pd.concat([new_run_list, pd.DataFrame.from_records([row])], ignore_index=True)
+            new_run_list = pd.concat([new_run_list, pd.DataFrame.from_records([row])], ignore_index=True)
 
     if args.outfn == "stdout":
         o = sys.stdout
