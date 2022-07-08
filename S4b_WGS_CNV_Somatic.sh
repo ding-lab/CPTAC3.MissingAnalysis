@@ -1,6 +1,6 @@
 # Loop over all diseases for a specific pipeline
 
-PIPELINE_NAME="WGS_CNV"
+PIPELINE_NAME="WGS_CNV_Somatic"
 DISEASES_FN="dat/diseases.dat"
 
 while read DIS; do

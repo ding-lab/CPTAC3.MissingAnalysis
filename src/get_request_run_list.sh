@@ -15,6 +15,7 @@ Options (all options required):
 -p PIPELINE_NAME: canonical name of pipeline we're evaluating.  Required
 -P PIPELINE_CONFIG_FN: configuration file with per-pipeline definitions.  Required
 -D DAS: Path to data analysis summary file.  If not defined, request run list is canonical run list
+-q: Add aliquot information to run_list
 
 Creates a canonical run list for all cases of interest
 Optionally refines this run list by excluding all runs which have already been performed
@@ -44,7 +45,7 @@ EOF
 PYTHON="python3"
 XARGS="" # arguments passed to make_canonical_run_list.py
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":hdC:o:s:p:P:D:" opt; do
+while getopts ":hdC:o:s:p:P:D:q" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -70,6 +71,9 @@ while getopts ":hdC:o:s:p:P:D:" opt; do
       ;;
     D) 
       DAS="$OPTARG"
+      ;;
+    q) 
+      MRL_ARGS="$MRL_ARGS -q" # make run list arguments.  Others can be passed this way too
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -172,7 +176,7 @@ while read PIPELINE_DETS; do
 	SUFFIX=$(echo "$PIPELINE_DETS" | cut -f 8)
 	UUID_COL=$(echo "$PIPELINE_DETS" | cut -f 9)
 
-	ARGS="$DEBUG -C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE "
+	ARGS="$DEBUG -C $CATALOG -o $CRL -a $ALIGNMENT -e $EXPERIMENTAL_STRATEGY -f $DATA_FORMAT -t $SAMPLE_TYPE $MRL_ARGS"
     
 	if [ $DATA_VARIETY != "." ]; then
 		ARGS="$ARGS -v $DATA_VARIETY"
