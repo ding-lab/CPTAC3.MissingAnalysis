@@ -213,12 +213,12 @@ if __name__ == "__main__":
     # there has to be a nicer way to do this...
     if has_aliquot_exclude:     
         if not is_paired_exclude:
-            exclude_list = list(exclude_df['datafile_aliquot'].itertuples(index=False, name=None))
+            exclude_list = list(exclude_df['datafile_aliquot'].values)
         else:
             exclude_list = list(exclude_df[['datafile1_aliquot', 'datafile2_aliquot']].itertuples(index=False, name=None))
     else:
         if not is_paired_exclude:
-            exclude_list = list(exclude_df['datafile_uuid'].itertuples(index=False, name=None))
+            exclude_list = list(exclude_df['datafile_uuid'].values)
         else:
             exclude_list = list(exclude_df[['datafile1_uuid', 'datafile2_uuid']].itertuples(index=False, name=None))
 
@@ -240,8 +240,15 @@ if __name__ == "__main__":
             else:
                 ds = (run['datafile1_uuid'], run['datafile2_uuid'])
             
-        if ds in exclude_list:
-            retain=False
+        # Generally, reject a run if ID matches something in exclude_list
+        # The exception is if run list is paired and exclude list is not, in which case
+        #   exclude run if any of its IDs match 
+        if is_paired_runlist and not is_paired_exclude:
+            if ds[0] in exclude_list or ds[1] in exclude_list:
+                retain=False
+        else:
+            if ds in exclude_list:
+                retain=False
 
         if args.debug:
             if retain:

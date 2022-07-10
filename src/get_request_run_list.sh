@@ -217,9 +217,9 @@ else
     # First, get the right header for OUT_ANALYZED.  These are UUIDs, and have different headers depending
     # on if it is paired run_list or not.  Paired run_lists have commas in $UUID_COL
     NCOL=$( echo "$UUID_COL" | grep -o "," | wc -l ) # 0 or 1
-    if [ $NCOL == 0 ]; then
+    if [ "$NCOL" == "0" ]; then
         printf "datafile_uuid\n" > $OUT_ANALYZED
-    elif [ $NCOL == 1 ]; then
+    elif [ "$NCOL" == "1" ]; then
         printf "datafile1_uuid\tdatafile2_uuid\n" > $OUT_ANALYZED
     else
         >&2 echo "ERROR: unexpected format of UUID_COL: $UUID_COL"
@@ -228,6 +228,7 @@ else
 
     #CMD="head -n1 $DAS | cut -f $UUID_COL >  $OUT_ANALYZED && tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
     CMD="tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
+    >&2 echo Running: $CMD
     eval $CMD
     test_exit_status
 
