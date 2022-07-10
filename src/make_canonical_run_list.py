@@ -122,14 +122,17 @@ def get_paired_runset(ds1, ds2):
     rs=list(itertools.product(ds1.values.tolist(), ds2.values.tolist()))
     return rs
 
-# Run list for paired run has the following columns:
+# Two column run list has the following columns:
 # * run_name
-# * run_data - json with fields: case, target pipeline, multiples_ds1, multiples_ds2
+# * case - will be json with fields: case, target pipeline, multiples_ds1, multiples_ds2
 #       NOTE: this is not implemmented, and currently this field has value of "case"
 # * datafile1_name
+# * [datafile1_aliquot]
 # * datafile1_uuid
 # * datafile2_name
+# * [datafile2_aliquot]
 # * datafile2_uuid
+
 # this works only for one case at a time right now
 # n1, n2 is multiples_ds1, multiples_ds2
 def get_two_column_run_list(rs, pipeline_info, n1, n2, suffix=None, write_aliquot=False):
@@ -161,9 +164,11 @@ def get_two_column_run_list(rs, pipeline_info, n1, n2, suffix=None, write_aliquo
 
 # Run list for single run has the following columns:
 # * run_name
-# * run_metadata - json with fields: case, target pipeline, is_paired, multiples_ds1, label1
+# * case    (may be metadata in future) (target pipeline, is_paired, multiples_ds1, label1 currently not implemented)
 # * datafile_name
+# * [datafile_aliquot]
 # * datafile_uuid
+
 # It is generated from data_list and has the same number of rows
 # pipeline data: dictionary of pipeline-associated variables which are appended to run_metadata
 #   * is_paired (if true, run_list has 2 input datasets, otherwise it has one)

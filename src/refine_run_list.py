@@ -15,9 +15,8 @@ def read_catalog(catalog_fn):
     catalog['metadata'] = catalog.apply(lambda row: json.loads(row['metadata']), axis=1)
     return catalog
 
-
-# dataset columns: ['dataset_name', 'uuid', 'case', 'disease', 'aliquot_tag']
-def get_dataset_list(catalog, cases, sample_types, alignment, experimental_strategy, data_format, data_variety):
+# datafile columns: ['datafile_name', 'uuid', 'case', 'disease', 'aliquot_tag']
+def get_datafile_list(catalog, cases, sample_types, alignment, experimental_strategy, data_format, data_variety):
     case_loc = catalog['case'].isin(cases)
     sample_types_loc = catalog['sample_type'].isin(sample_types)
 
@@ -37,11 +36,11 @@ def get_dataset_list(catalog, cases, sample_types, alignment, experimental_strat
     # * aliquot_tag
     catalog['aliquot_tag'] = catalog['metadata'].apply(lambda j: j['aliquot_tag'])
 
-    return( catalog.loc[all_loc, ['dataset_name', 'uuid', 'case', 'disease', 'aliquot_tag']])
+    return( catalog.loc[all_loc, ['datafile_name', 'uuid', 'case', 'disease', 'aliquot_tag']])
 
-# run_name is the case name with aliquot tags appended for any datasets with multiplicity > 1
+# run_name is the case name with aliquot tags appended for any datafiles with multiplicity > 1
 def get_run_name(case, aliquot1_tag, multiples_ds1, aliquot2_tag = None, multiples_ds2 = None):
-    # ds columns: ['dataset_name', 'uuid', 'case', 'disease', 'aliquot_tag']])
+    # ds columns: ['datafile_name', 'uuid', 'case', 'disease', 'aliquot_tag']])
     run_name = case
     if multiples_ds1 > 1:
         run_name = run_name + '.' + aliquot1_tag
@@ -55,10 +54,10 @@ def get_run_name(case, aliquot1_tag, multiples_ds1, aliquot2_tag = None, multipl
 # * run_name
 # * run_data - json with fields: case, disease, target pipeline, multiples_ds1, multiples_ds2
 #   NOTE: this is not implemmented, and currently this field has value of "case"
-# * dataset1_name
-# * dataset1_uuid
-# * dataset2_name
-# * dataset2_uuid
+# * datafile1_name
+# * datafile1_uuid
+# * datafile2_name
+# * datafile2_uuid
 # this works only for one case right now
 # example rows of dlm
 # ['C3L-00017.WXS.T.hg38', '4e2c5edf-8162-46f2-bb3e-11de6846c0e3', 'C3L-00017', 'PDA', 'ALQ_be7244ce']
@@ -69,7 +68,7 @@ def get_paired_run_list(dl1, dl2, pipeline_data):
 # https://stackoverflow.com/questions/45672342/create-a-dataframe-of-permutations-in-pandas-from-list
     dlm=list(itertools.product(dl1.values.tolist(), dl2.values.tolist()))
 
-    run_list = pd.DataFrame(columns=["run_name", "run_metadata", "dataset1_name", "dataset1_uuid", "dataset2_name", "dataset2_uuid"])
+    run_list = pd.DataFrame(columns=["run_name", "run_metadata", "datafile1_name", "datafile1_uuid", "datafile2_name", "datafile2_uuid"])
     for d in dlm:
         #run_name = get_run_name(d[0]['case'], d[0]['aliquot_tag'], multiples_ds1, d[1]['aliquot_tag'], multiples_ds2)
         ds1 = d[0]
@@ -77,29 +76,29 @@ def get_paired_run_list(dl1, dl2, pipeline_data):
 
         run_name = get_run_name(ds1[2], ds1[4], multiples_ds1, ds2[4], multiples_ds2)
         # note that run_metadata currently has value of case.  This needs to be updated
-        row={"run_name": run_name, "run_metadata": ds1[2], "dataset1_name": ds1[0], "dataset1_uuid": ds1[1], "dataset2_name": ds2[0], "dataset2_uuid":  ds2[1]}
+        row={"run_name": run_name, "run_metadata": ds1[2], "datafile1_name": ds1[0], "datafile1_uuid": ds1[1], "datafile2_name": ds2[0], "datafile2_uuid":  ds2[1]}
 
         run_list = run_list.append(row, ignore_index=True)
 #    dl['run_name'] = dl.apply(lambda row: get_run_name(row[0]['case'], row[0]['aliquot_tag'], multiples_ds1, row[1]['aliquot_tag'], multiples_ds2), axis=1 )
 
-    return run_list[['run_name', 'run_metadata', 'dataset1_name', 'dataset1_uuid', 'dataset2_name', 'dataset2_uuid']].reset_index(drop=True)
+    return run_list[['run_name', 'run_metadata', 'datafile1_name', 'datafile1_uuid', 'datafile2_name', 'datafile2_uuid']].reset_index(drop=True)
 
 
 # Run list for single run has the following columns:
 # * run_name
 # * run_metadata - json with fields: case, disease, target pipeline, is_paired, multiples_ds1, label1
-# * dataset_name
-# * dataset_uuid
+# * datafile_name
+# * datafile_uuid
 # It is generated from data_list and has the same number of rows
 # pipeline data: dictionary of pipeline-associated variables which are appended to run_metadata
-#   * is_paired (if true, run_list has 2 input datasets, otherwise it has one)
+#   * is_paired (if true, run_list has 2 input datafiles, otherwise it has one)
 #   * target_pipeline - optional
-#   * label1 - common name for dataset1, e.g. "tumor" (and label2 would be "normal")
+#   * label1 - common name for datafile1, e.g. "tumor" (and label2 would be "normal")
 
 # NOTE: currently, run_metadata is not functional
 def get_single_run_list(dl, pipeline_data):
-#    run_list is catalog.loc[all_loc, ['dataset_name', 'uuid', 'case', 'disease', 'aliquot_tag']]
-    dl = dl.rename(columns={'uuid': 'dataset_uuid'})
+#    run_list is catalog.loc[all_loc, ['datafile_name', 'uuid', 'case', 'disease', 'aliquot_tag']]
+    dl = dl.rename(columns={'uuid': 'datafile_uuid'})
     multiples_ds1 = dl.shape[0]
 
     #dl['run_name'] = dl.apply(lambda row: get_run_name(row, multiples_ds1), axis=1 )
@@ -112,60 +111,146 @@ def get_single_run_list(dl, pipeline_data):
     #dl['run_metadata'] = dl.apply(lambda row: json.dumps(run_metadata.update(pipeline_data)), axis=1 )
     dl = dl.rename(columns={'case': 'run_metadata'})
 
-    return dl[['run_name', 'run_metadata', 'dataset_name', 'dataset_uuid']].reset_index(drop=True)
+    return dl[['run_name', 'run_metadata', 'datafile_name', 'datafile_uuid']].reset_index(drop=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate run list for cases of interest from Catalog3 file for single and paired runs ")
     parser.add_argument("-d", "--debug", action="store_true", help="Print debugging information to stderr")
     parser.add_argument("-o", "--output", dest="outfn", default="stdout", help="Output file name.  Default writes to stdout")
-    parser.add_argument("-U", "--uuid_fn", help="List of uuids or tab-separated uuid pairs already processed.  Requires a header line")
-    parser.add_argument('in_run_list', help="Input run list")
+    parser.add_argument("-X", "--exclude_fn", help="List of datafiles or datafile pairs (TSV) to exclude. May list aliquots or UUIDs. Headers like ['datafile_uuid'] or ['datafile1_aliquot', 'datafile2_aliquot'] required")
+    parser.add_argument('runlist_fn', help="Input run list")
 
     args = parser.parse_args()
+    # run list columns:
+    # * run_name
+    # * case   (in future, may be metadata)
+    # If one datafile,   (is_paired_runlist = false)
+        # * datafile_name
+        # * datafile_aliquot - this is optional. (has_aliquot_runlist = True)
+        # * datafile_uuid
+    # If two datafiles,  (is_paired_runlist = true)
+        # * datafile1_name
+        # * datafile1_aliquot - this is optional
+        # * datafile1_uuid
+        # * datafile2_name
+        # * datafile2_aliquot - present iff datafile1_aliquot present
+        # * datafile2_uuid
 
-    # get list of uuids1 and optionally uuids2 to exclude
-    # TODO: catch this error and handle it gracefully:
-    #    pandas.errors.EmptyDataError: No columns to parse from file
+    # exclude_list columns
+    # * ["datafile_uuid"]
+    #   * is_paired_exclude = False, has_aliquot_exclude = False
+    # * ["datafile1_uuid", "datafile2_uuid"]
+    #   * is_paired_exclude = True, has_aliquot_exclude = False
+    # * ["datafile_aliquot"]
+    #   * is_paired_exclude = False, has_aliquot_exclude = True
+    # * ["datafile1_aliquot", "datafile2_aliquot"]
+    #   * is_paired_exclude = True, has_aliquot_exclude = True
+
     try:
-        uuid_df = pd.read_csv(args.uuid_fn, sep="\t").drop_duplicates()
+        exclude_df = pd.read_csv(args.exclude_fn, sep="\t").drop_duplicates()
+        exclude_cols = list(exclude_df.columns.values)
     except pd.errors.EmptyDataError:
-        eprint("ERROR: " + args.uuid_fn + " is empty")
-        sys.exit(1)
+        raise ValueError("ERROR: " + args.exclude_fn + " is empty")
 
-    if len(uuid_df.columns) == 1:
-        is_paired = False
-        uuids = uuid_df.iloc[:,0].tolist()
-    elif len(uuid_df.columns) == 2:
-        is_paired = True
-        uuids = []
-        for index, row in uuid_df.iterrows():
-            uuids.append( (row[0], row[1]))
+    if args.debug:
+        print("DEBUG: exclude_cols: " + str(exclude_cols))
+
+    if 'datafile_uuid' in exclude_cols:
+        is_paired_exclude = False
+        has_aliquot_exclude = False
+    elif 'datafile_aliquot' in exclude_cols:
+        is_paired_exclude = False
+        has_aliquot_exclude = True
+    # https://stackoverflow.com/questions/6159313/how-to-test-the-membership-of-multiple-values-in-a-list
+    #elif all( c in ['datafile1_uuid', 'datafile2_uuid'] for c in exclude_cols):
+    elif all( c in exclude_cols for c in ['datafile1_uuid', 'datafile2_uuid']):
+        is_paired_exclude = True
+        has_aliquot_exclude = False
+    elif all( c in exclude_cols for c in ['datafile1_aliquot', 'datafile2_aliquot']):
+        is_paired_exclude = True
+        has_aliquot_exclude = True
     else:
-        raise ValueError('Unexpected number of columns in '+ uuid_fn)
+        raise ValueError("ERROR: Unexpected columns in " + args.exclude_fn + ":\n"+str(exclude_cols))
 
-    # get run_list object
-    run_list = pd.read_csv(args.in_run_list, sep="\t")
+    # now read in run list
+    try:
+        run_list = pd.read_csv(args.runlist_fn, sep="\t")
+        runlist_cols = list(run_list.columns.values)
+    except pd.errors.EmptyDataError:
+        raise ValueError("ERROR: " + args.runlist_fn + " is empty")
+    if 'datafile_name' in runlist_cols:
+        is_paired_runlist = False
+        has_aliquot_runlist = False
+    #elif all (c in ['datafile1_name', 'datafile2_name'] for c in runlist_cols):
+    elif all (c in runlist_cols for c in ['datafile1_uuid', 'datafile2_uuid']):
+        is_paired_runlist = True
+        has_aliquot_runlist = False
+    if 'datafile_aliquot' in runlist_cols:
+        is_paired_runlist = False
+        has_aliquot_runlist = True
+    #elif all (c in ['datafile1_aliquot', 'datafile2_aliquot'] for c in runlist_cols):
+    elif all (c in runlist_cols for c in ['datafile1_aliquot', 'datafile2_aliquot']):
+        is_paired_runlist = True
+        has_aliquot_runlist = True
+    else:
+        raise ValueError("ERROR: Unexpected columns in " + args.runlist_fn + ":\n"+str(runlist_cols))
 
-    new_run_list = pd.DataFrame(columns=run_list.columns)
+    if args.debug:
+        print("DEBUG: is_paired_exclude = " + str(is_paired_exclude) + ", has_aliquot_exclude = " + str(has_aliquot_exclude))
+        print("DEBUG: is_paired_runlist = " + str(is_paired_runlist) + ", has_aliquot_runlist = " + str(has_aliquot_runlist))
+        
 
-    for index, row in run_list.iterrows():
-        retain=True
-        if not is_paired:
-            if row.iloc[3] in uuids:
-                retain=False
+    # Sanity checks:
+    # * if has_aliquot_exclude, require that has_aliquot_runlist
+    # * error if is_paired_exclude but run list is not paired
+    if has_aliquot_exclude and not has_aliquot_runlist:
+        raise ValueError("ERROR: aliquots listed in " + args.exclude_fn + " but not in " + args.runlist_fn)
+    if is_paired_exclude and not is_paired_runlist:
+        raise ValueError("ERROR: Exclude file " + args.exclude_fn + " is paired but " + args.runlist_fn + " is not paired")
+    
+    # https://stackoverflow.com/questions/9758450/pandas-convert-dataframe-to-array-of-tuples
+    # there has to be a nicer way to do this...
+    if has_aliquot_exclude:     
+        if not is_paired_exclude:
+            exclude_list = list(exclude_df['datafile_aliquot'].itertuples(index=False, name=None))
         else:
-            if (row.iloc[3], row.iloc[5]) in uuids:
-                retain=False
+            exclude_list = list(exclude_df[['datafile1_aliquot', 'datafile2_aliquot']].itertuples(index=False, name=None))
+    else:
+        if not is_paired_exclude:
+            exclude_list = list(exclude_df['datafile_uuid'].itertuples(index=False, name=None))
+        else:
+            exclude_list = list(exclude_df[['datafile1_uuid', 'datafile2_uuid']].itertuples(index=False, name=None))
+
+    new_run_list = pd.DataFrame(columns=runlist_cols)
+
+    # Loop through list of runs and identify those to retain
+    for index, run in run_list.iterrows():
+        retain=True
+
+        # ds is either string or tuple (is_paired_runlist), is the relevant run identifiers to match to exclude list
+        if has_aliquot_exclude:     # if exclude list has aliquots, we compare runlist aliquots
+            if not is_paired_runlist:
+                ds = run['datafile_aliquot']
+            else:
+                ds = (run['datafile1_aliquot'], run['datafile2_aliquot'])
+        else:
+            if not is_paired_runlist:
+                ds = run['datafile_uuid']
+            else:
+                ds = (run['datafile1_uuid'], run['datafile2_uuid'])
+            
+        if ds in exclude_list:
+            retain=False
 
         if args.debug:
             if retain:
-                eprint("\nRETAIN : \n" + str(row))
+                eprint("\nRETAIN : \n" + str(run))
             else:
-                eprint("\nEXCLUDE: \n" + str(row))
+                eprint("\nEXCLUDE: \n" + str(run))
         if retain:
-            #new_run_list = new_run_list.append(row)
-            new_run_list = pd.concat([new_run_list, pd.DataFrame.from_records([row])], ignore_index=True)
+            #new_run_list = new_run_list.append(run)
+            new_run_list = pd.concat([new_run_list, pd.DataFrame.from_records([run])], ignore_index=True)
 
     if args.outfn == "stdout":
         o = sys.stdout

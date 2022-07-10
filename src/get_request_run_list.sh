@@ -17,7 +17,7 @@ Options (all options required):
 -D DAS: Path to data analysis summary file.  If not defined, request run list is canonical run list
 -q: Add aliquot information to run_list
 
-Creates a canonical run list for all cases of interest
+Create canonical run list for all cases of interest
 Optionally refines this run list by excluding all runs which have already been performed
   based on information from data analysis summary file and writes request run list
 
@@ -212,11 +212,26 @@ if [ -z $DAS ]; then
 else
     OUT_ANALYZED="$OUTD/analyzed_UUIDs.dat"
     # Note that we need to retain the header and it doesn't necessarily sort right
-    CMD="head -n1 $DAS | cut -f $UUID_COL >  $OUT_ANALYZED && tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
+#echo "a" | grep -o ',' | wc -l
+
+    # First, get the right header for OUT_ANALYZED.  These are UUIDs, and have different headers depending
+    # on if it is paired run_list or not.  Paired run_lists have commas in $UUID_COL
+    NCOL=$( echo "$UUID_COL" | grep -o "," | wc -l ) # 0 or 1
+    if [ $NCOL == 0 ]; then
+        printf "datafile_uuid\n" > $OUT_ANALYZED
+    elif [ $NCOL == 1 ]; then
+        printf "datafile1_uuid\tdatafile2_uuid\n" > $OUT_ANALYZED
+    else
+        >&2 echo "ERROR: unexpected format of UUID_COL: $UUID_COL"
+        exit 1
+    fi
+
+    #CMD="head -n1 $DAS | cut -f $UUID_COL >  $OUT_ANALYZED && tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
+    CMD="tail -n +2 $DAS | cut -f $UUID_COL | sort -u >> $OUT_ANALYZED"
     eval $CMD
     test_exit_status
 
-    CMD="$PYTHON src/refine_run_list.py -U $OUT_ANALYZED -o $OUT_ANALYSIS $CRL "
+    CMD="$PYTHON src/refine_run_list.py -X $OUT_ANALYZED -o $OUT_ANALYSIS $CRL "
     >&2 echo Running: $CMD
     eval $CMD
     test_exit_status
