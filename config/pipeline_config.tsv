@@ -1,5 +1,5 @@
 pipeline	alignment	experimental_strategy	data_format	data_variety	sample_type	sample_type2	suffix	as_uuid_col
-miRNA-Seq	unaligned	miRNA-Seq	BAM	.	"tumor,tissue_normal,recurrent_tumor"	.	.	14
+miRNA-Seq	unaligned	miRNA-Seq	BAM	.	"tumor,tissue_normal,recurrent_tumor,tumor_bone_marrow,tumor_peripheral_blood"	.	.	14
 RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	tumor	.	T	12
 RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	tissue_normal	.	A	12
 WGS_SV	harmonized	WGS	BAM	.	tumor	blood_normal	.	"12,14"
