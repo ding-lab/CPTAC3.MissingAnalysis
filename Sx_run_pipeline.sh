@@ -12,13 +12,13 @@ CATALOG="$CATALOG_ROOT/Catalog3/CPTAC3.Catalog3.tsv"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 
 DAS="$CATALOG_ROOT/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
-#DAS_ARG="-D $DAS"
+DAS_ARG="-D $DAS"
 
 # Add aliquot info to all output
 ARGS="-q"
 
-#CASES_FN="dat/cases/${DIS}-cases.dat"
-CASES_FN="dat/cases/test-cases.dat"
+CASES_FN="dat/cases/${DIS}-cases.dat"
+#CASES_FN="dat/cases/test-cases.dat"
 OUTD="dat/results/$PIPELINE_NAME/$DIS"
 mkdir -p $OUTD
 

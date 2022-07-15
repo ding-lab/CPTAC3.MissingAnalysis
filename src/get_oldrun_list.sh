@@ -114,26 +114,31 @@ function test_exit_status {
 
 # Search for an aliquot in a catalog2 file based on UUID
 # WARNING if anything other than one aliquot found
+# Actually, situation of no aliquot found is common. For instance, we've processed a dataset which did not 
+# exist at time historical catalog was made.  Would be good to pre-filter results based on timestamp - TODO
 function get_aliquot {
     UUID=$1
     # CATALOG is read as a global
 
     if [ ! -f $CATALOG ]; then
         >&2 echo ERROR: $CATALOG not found
-        exit
+        exit 1
     fi
 
-    ALIQUOT=$(awk -v uuid=$UUID '{if ($11 == uuid) print $6}' $CATALOG | sort -u)
+    ALIQUOT=$(awk -v uuid=$UUID 'BEGIN{FS="\t"; OFS="\t"}{if ($11 == uuid) print $6}' $CATALOG | sort -u)
+
     if [ -z $ALIQUOT ]; then
-        >&2 echo WARNING: No entry found in $CATALOG for $UUID
+        # >&2 echo WARNING: No entry found in $CATALOG for $UUID
+        return
     elif [ $(echo "$ALIQUOT" | wc -l) != "1" ]; then
         >&2 echo WARNING: multiple entries found in $CATALOG for $UUID
+        exit 1
     fi
 
     echo $ALIQUOT
 }
 
-UUID_COL=$(awk -v PN=$PIPELINE_NAME '{if ($1 == PN) print $9}' $PIPELINE_CONFIG_FN | sort -u)
+UUID_COL=$(awk -v PN=$PIPELINE_NAME 'BEGIN{FS="\t"; OFS="\t"}{if ($1 == PN) print $9}' $PIPELINE_CONFIG_FN | sort -u)
 
 OUTD=$(dirname "$OUTFN")
 mkdir -p $OUTD
@@ -160,12 +165,17 @@ else
 fi
 
 # Now go through all UUID / UUID pairs in file TMP and convert them to aliquots
+# This is quite slow.  Better to implement in python / pandas
 while read L; do
     if [ $DEBUG ]; then
         >&2 echo Processing $L
     fi
     U1=$(echo "$L" | cut -f 1)
     A1=$(get_aliquot $U1)
+
+    if [ -z $A1 ]; then
+        continue
+    fi
 
     if [ $IS_PAIRED == "1" ]; then
         U2=$(echo "$L" | cut -f 2)

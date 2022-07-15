@@ -19,6 +19,7 @@ function process {
 }
 
 cat << EOF > $DISEASES_FN
+AML
 GBM
 PDA
 EOF
