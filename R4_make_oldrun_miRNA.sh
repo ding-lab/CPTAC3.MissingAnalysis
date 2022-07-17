@@ -1,26 +1,19 @@
-# Make a list of aliquots associated with past analyses.
-# This is meant to deal with gencode 22 / 36 transition, where
-# we wish to exclude from analysis datafile pairs which were already
-# processed as gencode 22.  This is done by matching aliquots
-#
-# Runs once per pipeline
-# 
-# Starting with per-pipeline DCC analysis summary file,
-#  * Extract UUID or UUID pair for that run
-#  * Based on old CPTAC3 v2 catalog, convert UUIDs to aliquots
-#    * this catalog is that used around the time of analysis
+# Deal with special case of miRNA and make past runs from current catalog
+# Generally, miRNA uses unaligned data.  In some cases hg38 data was used,
+# and we don't want to rerun.  Aliquot matching like for oldrun will work,
+# but the catalog needs to be current to incorporate all data
+# Here, creating "current aliquot list" from today's catalog (v2) which will be used
+# for such miRNA-Seq filtering.  Note, miRNA-Seq unaligned data will not suffer from v22/36 conversion, I think
 
-# Write file dat/result/PIPELINE/oldrun_aliquot_list.dat
-
-CATALOG="config/CPTAC3.Catalog-f7b28ac.dat"
+CATALOG="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog/CPTAC3.Catalog.dat"
+OLDRUN_LIST="current_aliquot_list.dat"
 OUTD="dat"
 mkdir -p $OUTD
 
 PIPELINES="\
-RNA-Seq_Expression \
+miRNA-Seq \
 "
 
-#miRNA-Seq \
 #Methylation_Array \
 #RNA-Seq_Expression \
 #RNA-Seq_Fusion \
@@ -45,7 +38,6 @@ function process_oldrun {
 
     # making some assumptions about output locations
     # Example run list: dat/results/Methylation_Array/PDA/request_run_list.dat
-    OLDRUN_LIST="oldrun_aliquot_list.dat"
     OUTFN="dat/results/$PIPELINE/$OLDRUN_LIST"
 
     CMD="bash src/get_oldrun_list.sh $XARGS -C $CATALOG -o $OUTFN -p $PIPELINE -P $PIPELINE_CONFIG_FN -D $DAS"

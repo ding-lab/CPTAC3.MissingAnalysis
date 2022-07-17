@@ -145,7 +145,7 @@ mkdir -p $OUTD
 TMP="$OUTD/processed_UUID.tmp"
 rm -f $TMP
 
-CMD="cut -f $UUID_COL $DAS | tail -n +2 | sort -u >> $TMP"
+CMD="cut -f $UUID_COL $DAS | tr -d $'\r' | tail -n +2 | sort -u >> $TMP"
 echo Running $CMD
 eval $CMD
 

@@ -19,10 +19,11 @@ function process {
 }
 
 cat << EOF > $DISEASES_FN
-AML
 GBM
-PDA
 EOF
+#AML
+#GBM
+#PDA
 
 if [ ! -f $ALL_CASES ]; then
     >&2 echo ERROR: $ALL_CASES not found
