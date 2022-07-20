@@ -52,12 +52,6 @@ $ grep C3N-04611.RNA-Seq.T CPTAC3.Catalog3.tsv | cut -f 7
 
 These specific samples are badly parsed and the data variety may not be sufficient to identify paired datasets
 
-### Weird endings in analyzed_UUIDs.dat
-
-Looking at `dat/WXS_MSI/analyzed_UUIDs.dat`, some lines end in `^M` which is weird.
-Example c01f4ba5-1030-49c0-902d-fec56a504d15
-It seems first two correspond to buccal_normal, which is unusual 
-
 # Other test cases
 ## C3N-01200
 This case has five methylation samples
@@ -76,3 +70,97 @@ C3N-04113.MethArray.Red.T	CPT0285620006	204930630109_R07C01_Red.idat	df28f441-dc
 This is unusual, since different datasets typically have different aliquots.  Are there other such instances?
 Focus on methylation - no, this is the only one.
 
+
+# Ongoing runs
+
+All runs are excluded from request run list - is this so?
+This seems to be a general problem, TODO 
+
+Currently 7/6/22 running all pipelines - run A
+
+## Results
+    32 dat/results/Methylation_Array/GBM/request_run_list.dat
+     1 dat/results/Methylation_Array/PDA/request_run_list.dat
+   239 dat/results/RNA-Seq_Expression/GBM/request_run_list.dat
+   266 dat/results/RNA-Seq_Expression/PDA/request_run_list.dat
+    23 dat/results/RNA-Seq_Fusion/GBM/request_run_list.dat
+    61 dat/results/RNA-Seq_Fusion/PDA/request_run_list.dat
+    12 dat/results/RNA-Seq_Transcript/GBM/request_run_list.dat
+    19 dat/results/RNA-Seq_Transcript/PDA/request_run_list.dat
+    48 dat/results/WGS_SV/GBM/request_run_list.dat
+     1 dat/results/WGS_SV/PDA/request_run_list.dat
+    45 dat/results/WXS_Germline/GBM/request_run_list.dat
+    16 dat/results/WXS_Germline/PDA/request_run_list.dat
+    69 dat/results/WXS_MSI/GBM/request_run_list.dat
+   128 dat/results/WXS_MSI/PDA/request_run_list.dat
+    69 dat/results/WXS_Somatic_Variant_SW/GBM/request_run_list.dat
+    18 dat/results/WXS_Somatic_Variant_SW/PDA/request_run_list.dat
+    69 dat/results/WXS_Somatic_Variant_TD/GBM/request_run_list.dat
+    18 dat/results/WXS_Somatic_Variant_TD/PDA/request_run_list.dat
+    21 dat/results/miRNA-Seq/GBM/request_run_list.dat
+     2 dat/results/miRNA-Seq/PDA/request_run_list.dat
+
+# aliquot information
+
+for additional downstream filtering it is important to have available the aliquot name associated with the datafile name.
+We define a new run list which has fields (name, aliquot, uuid) for both dataset1 and dataset2
+
+Review these closely, particularly:
+* Expression - we are probably looking at GENCODE36 replacements.  Need to filter by aliquot name
+* Review deprecated aliquots - make sure any proposed run excludes these
+
+## RunB
+Total rerun, using new refine script.  Results should be same as above, and they can be further refined
+with aliquot filtering:
+* Remove aliquots correlated to previous runs (gencode36/22)
+* Remove deprecated aliquots
+
+    32 dat/results/Methylation_Array/GBM/request_run_list.dat
+     1 dat/results/Methylation_Array/PDA/request_run_list.dat
+    21 dat/results/miRNA-Seq/GBM/request_run_list.dat
+     2 dat/results/miRNA-Seq/PDA/request_run_list.dat
+   239 dat/results/RNA-Seq_Expression/GBM/request_run_list.dat
+   266 dat/results/RNA-Seq_Expression/PDA/request_run_list.dat
+    23 dat/results/RNA-Seq_Fusion/GBM/request_run_list.dat
+    61 dat/results/RNA-Seq_Fusion/PDA/request_run_list.dat
+    12 dat/results/RNA-Seq_Transcript/GBM/request_run_list.dat
+    19 dat/results/RNA-Seq_Transcript/PDA/request_run_list.dat
+    48 dat/results/WGS_CNV_Somatic/GBM/request_run_list.dat
+     1 dat/results/WGS_CNV_Somatic/PDA/request_run_list.dat
+    48 dat/results/WGS_SV/GBM/request_run_list.dat
+     1 dat/results/WGS_SV/PDA/request_run_list.dat
+    45 dat/results/WXS_Germline/GBM/request_run_list.dat
+    16 dat/results/WXS_Germline/PDA/request_run_list.dat
+    69 dat/results/WXS_MSI/GBM/request_run_list.dat
+   128 dat/results/WXS_MSI/PDA/request_run_list.dat
+    69 dat/results/WXS_Somatic_Variant_SW/GBM/request_run_list.dat
+    18 dat/results/WXS_Somatic_Variant_SW/PDA/request_run_list.dat
+    69 dat/results/WXS_Somatic_Variant_TD/GBM/request_run_list.dat
+    18 dat/results/WXS_Somatic_Variant_TD/PDA/request_run_list.dat
+
+# Old runs
+
+Will use this catalog commit; this happened before the mid-december 2021 V36 transition
+    commit f7b28ac6f465a7bba0f43457a48a8b2a3a9555e8
+    Author: Matthew A. Wyczalkowski <m.wyczalkowski@wustl.edu>
+    Date:   Tue Dec 1 14:07:57 2020 -0600
+
+        Discovery batch discover.20201119
+
+        * Discovery ran 11/27/20
+        * Incorporating new aliquot annotation from GDC
+        * Work dir: mammoth:/home/mwyczalk_test/Projects/CPTAC3/discovery/discover.20201119
+Will save this here as, config/CPTAC3.Catalog-f7b28ac.dat
+
+## Refine with oldrun
+
+Continue testing of T1 and T2 for RNA-Seq expression. Confirm that oldrun steps
+are correct.  
+
+Implement filtering for all pipelines
+
+## oldrun issues
+
+From R3, note that for Fusion the file
+    dat/results/RNA-Seq_Fusion/oldrun_aliquot_list.dat
+has a number of instances where there is only one aliquot
