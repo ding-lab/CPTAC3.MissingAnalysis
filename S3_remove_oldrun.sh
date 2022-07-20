@@ -2,20 +2,18 @@
 # for CPTAC3 catalog work
 
 PIPELINES="\
+miRNA-Seq \
+Methylation_Array \
 RNA-Seq_Expression \
+RNA-Seq_Fusion \
+RNA-Seq_Transcript \
+WGS_CNV_Somatic \
+WGS_SV \
+WXS_Germline \
+WXS_MSI \
+WXS_Somatic_Variant_TD \
+WXS_Somatic_Variant_SW \
 "
-# miRNA-Seq \
-#Methylation_Array \
-#RNA-Seq_Expression \
-#RNA-Seq_Fusion \
-#RNA-Seq_Transcript \
-#WGS_CNV_Somatic \
-#WGS_SV \
-#WXS_Germline \
-#WXS_MSI \
-#WXS_Somatic_Variant_TD \
-#WXS_Somatic_Variant_SW \
-#"
 
 DISEASES_FN="dat/diseases.dat"
 

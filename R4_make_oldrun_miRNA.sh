@@ -14,18 +14,6 @@ PIPELINES="\
 miRNA-Seq \
 "
 
-#Methylation_Array \
-#RNA-Seq_Expression \
-#RNA-Seq_Fusion \
-#RNA-Seq_Transcript \
-#WGS_CNV_Somatic \
-#WGS_SV \
-#WXS_Germline \
-#WXS_MSI \
-#WXS_Somatic_Variant_TD \
-#WXS_Somatic_Variant_SW \
-#"
-
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 
 CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
