@@ -42,17 +42,17 @@ Algorithm and outputs
 ## Download summaries
 | Pipeline              | System    | Data type            | Sample type(s)  | pairedTN |
 | -----------           | ------    | ---------            | --------------- | -------- |
-| Methylation           | katmai    | Methylation Array    | Tumor, Normal   |   no (but has Red, Green) |
+| Methylation_Array     | katmai    | Methylation Array    | Tumor, Normal   |   no (but has Red, Green) |
 | miRNA-Seq             | katmai    | miRNA-Seq harmonized | Tumor, Adjacent |   no     |
 | RNA-Seq_Expression    | storage1  | RNA-Seq harmonized   | Tumor, Adjacent |   no     |
-| RNA-Seq_Fusion        | storage1  | RNA-Seq FASTQ        | Tumor, Adjacent |   no     |
-| RNA-Seq_Transcript    | (1)       | RNA-Seq FASTQ        | Tumor, Adjacent |   no     |
-| WGS_CNV               | storage1  | WGS harmonized       | Tumor + Normal  |   yes    |
+| RNA-Seq_Fusion        | katmai (2)| RNA-Seq FASTQ        | Tumor, Adjacent |   no     |
+| RNA-Seq_Transcript    | katmai (1)| RNA-Seq FASTQ        | Tumor, Adjacent |   no     |
+| WGS_CNV_Somatic       | storage1  | WGS harmonized       | Tumor + Normal  |   yes    |
 | WGS_SV                | storage1  | WGS harmonized       | Tumor + Normal  |   yes    |
 | WXS_Germline          | MGI       | WXS harmonized       | Tumor           |   no     |
 | WXS_MSI               | storage1  | WXS harmonized       | Tumor + Normal  |   yes    |
-| WXS_Somatic_SW        | storage1  | WXS harmonized       | Tumor + Normal  |   yes    |
-| WXS_Somatic_TD        | storage1  | WXS harmonized       | Tumor + Normal  |   yes    |
+| WXS_Somatic_Variant_SW| storage1  | WXS harmonized       | Tumor + Normal  |   yes    |
+| WXS_Somatic_Variant_TD| storage1  | WXS harmonized       | Tumor + Normal  |   yes    |
 
 Note: Sample type "tumor, normal" indicates that these two sample types are processed individually
 (separate run for tumor and normal).  Sample type "tumor + normal" indicates a paired tumor/normal pipeline,
@@ -60,6 +60,7 @@ where both tumor and normal are inputs for one run. This is also indicated by th
 
 Notes
 1. Currently only katmai, but possibly moving to storage1
+2. Can run on either storage1 or katmai
 
 ## Pipeline configutation 
 Pipeline configuration file has the following columns; it is TSV with a header and uses '.' to indicate empty / inapplicable fields
