@@ -42,6 +42,10 @@ Algorithm and outputs
      -> This is the run list which needs to be analyzed
 EOF
 
+# Output filenames
+OUTA_FN="A_canonical_run_list.dat"
+OUTB_FN="B_request_run_list.dat"
+
 PYTHON="python3"
 XARGS="" # arguments passed to make_canonical_run_list.py
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
@@ -152,7 +156,7 @@ test_exit_status
 # Iterate over all lines in pipeline configuration file and process any that exists
 
 # We delete this file if it exists because make_canonical_run_list.py will append to existing files
-CRL="$OUTD/canonical_run_list.dat"
+CRL="$OUTD/$OUTA_FN"
 rm -f $CRL
 test_exit_status 
 PROCESSED=0		# flag indicating if pipeline was processed at least once
@@ -202,7 +206,7 @@ if [ $PROCESSED == 0 ]; then
 	exit 1
 fi
 
-OUT_ANALYSIS="$OUTD/request_run_list.dat"
+OUT_ANALYSIS="$OUTD/$OUTB_FN"
 #  3. Get all UUIDs which have been analyzed (analyzed UUIDs), possibly paired
 #     If DAS not defined, assume that nothing has been analyzed
 if [ -z $DAS ]; then
