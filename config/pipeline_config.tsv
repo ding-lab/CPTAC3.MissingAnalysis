@@ -2,9 +2,9 @@ pipeline	alignment	experimental_strategy	data_format	data_variety	sample_type	sa
 Methylation_Array	NA	Methylation_Array	IDAT	"Red,Green"	"tumor,tumor_bone_marrow,tumor_peripheral_blood"	.	T	"12,14"
 Methylation_Array	NA	Methylation_Array	IDAT	"Red,Green"	recurrent_tumor	.	R	"12,14"
 Methylation_Array	NA	Methylation_Array	IDAT	"Red,Green"	tissue_normal	.	A	"12,14"
-miRNA-Seq	unaligned	miRNA-Seq	BAM	.	"tumor,tumor_bone_marrow,tumor_peripheral_blood"	.	T	14
-miRNA-Seq	unaligned	miRNA-Seq	BAM	.	recurrent_tumor	.	R	14
-miRNA-Seq	unaligned	miRNA-Seq	BAM	.	tissue_normal	.	A	14
+miRNA-Seq	harmonized	miRNA-Seq	BAM	.	"tumor,tumor_bone_marrow,tumor_peripheral_blood"	.	T	14
+miRNA-Seq	harmonized	miRNA-Seq	BAM	.	recurrent_tumor	.	R	14
+miRNA-Seq	harmonized	miRNA-Seq	BAM	.	tissue_normal	.	A	14
 RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	"tumor,tumor_bone_marrow,tumor_peripheral_blood"	.	T	12
 RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	recurrent_tumor	.	R	12
 RNA-Seq_Expression	harmonized	RNA-Seq	BAM	genomic	tissue_normal	.	A	12
