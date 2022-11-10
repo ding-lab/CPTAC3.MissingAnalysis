@@ -178,7 +178,13 @@ if __name__ == "__main__":
         run_list = pd.read_csv(args.runlist_fn, sep="\t")
         runlist_cols = list(run_list.columns.values)
     except pd.errors.EmptyDataError:
-        raise ValueError("ERROR: " + args.runlist_fn + " is empty")
+        # Deal with empty run lists gracefully.  It happens
+        # Just create empty file in the name of the output file
+        eprint("NOTE: "+args.exclude_fn+" is empty.  Creating empty file " + args.outfn +" and quitting.")
+        open(args.outfn, "a").close()
+        sys.exit(0)
+
+#        raise ValueError("ERROR: " + args.runlist_fn + " is empty")
     if 'datafile_name' in runlist_cols:
         is_paired_runlist = False
         has_aliquot_runlist = False

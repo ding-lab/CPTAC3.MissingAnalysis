@@ -1,11 +1,10 @@
 Analysis here aims to determine which pipelines for which diseases
 still need to be analyzed.  
 
-This is an evolving project.  All cases for all diseases defined in step 0 are considered.
-Future work will involve moving `RUN_LIST` creation from CromwellRunner to here.
-
 Additional work is needed to resolve Ensembl v22 vs. v36 RNA-Seq data issues.  Harmonized
-data silently replaced v22 with v36, with changes to UUID.  Past analyses not caught
+data silently replaced v22 with v36, with changes to UUID.  Past analyses can be identified
+with oldrun_list, but this is not reliable
+
 
 ## Versions
 
@@ -17,24 +16,20 @@ for core processing
 
 # Case lists
 
-Case lists are created with the script `0_make_case_list.sh`
 
-# Algorithm v1
-From src/get_missing_analyses.sh
-Algorithm and outputs
-  1. we are given list of cases of interest (-s CASES)
-  2. Identify all UUIDs associated with cases of interest (UUIDs of interest)
-  3. Get all UUIDs which have been analyzed (analyzed UUIDs)
-     -> Based on data analysis summary file
-     -> tumor/normal pipelines parsed to capture both input UUIDs
-     -> Writes out OUTD/DIS/analyzed_UUID.dat
-  4. Find analysis UUIDs as difference between UUIDs of interest and analyzed UUIDs
-     -> These are the UUIDs which are to be analyzed
-     -> Writes out OUTD/DIS/analysis_UUID.dat
-     -> Also writes OUTD/DIS/analysis_SN.dat, with the fields "sample_name, case, disease, UUID"
-        
-  5. Find UUIDs to download as analysis UUIDs which are not present in BamMap (download UUID)
-     -> Writes out OUTD/DIS/download_UUID.dat
+## Configuration
+
+See config/pipeline_config.tsv for details about each pipeline.  This is generated from a numbers spreadsheet
+
+There are three types of workflows we consider:
+* unpaired with simple dataset  (one datafile in run list)
+* paired with simple dataset    (two datafiles in run list)
+* unpaired with compound dataset (two datafiles in run list)
+where a simple dataset has one datafile and a compound dataset has two datafiles (e.g. R1 and R2)
+
+The second two cases are important to distinguish:
+* compound datasets have multiple data varieties (e.g. "-v R1,R2")
+* paired workflows have two sample types defined (e.g. "-t tumor -T tissue_normal")
 
 
 # Results
