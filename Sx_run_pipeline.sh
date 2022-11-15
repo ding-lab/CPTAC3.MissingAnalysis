@@ -7,7 +7,8 @@ DIS=$2
 shift 2
 XARGS="$@"
 
-CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
+CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
+#CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
 CATALOG="$CATALOG_ROOT/Catalog3/CPTAC3.Catalog3.tsv"
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 

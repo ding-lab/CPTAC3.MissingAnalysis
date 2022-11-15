@@ -5,7 +5,9 @@
 # Here, creating "current aliquot list" from today's catalog (v2) which will be used
 # for such miRNA-Seq filtering.  Note, miRNA-Seq unaligned data will not suffer from v22/36 conversion, I think
 
-CATALOG="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog/CPTAC3.Catalog.dat"
+#CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
+CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
+CATALOG="$CATALOG_ROOT/CPTAC3.Catalog.dat"
 OLDRUN_LIST="current_aliquot_list.dat"
 OUTD="dat"
 mkdir -p $OUTD
@@ -16,7 +18,6 @@ miRNA-Seq \
 
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 
-CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
 
 function process_oldrun {
     P=$1

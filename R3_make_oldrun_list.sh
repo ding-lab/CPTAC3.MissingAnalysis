@@ -32,7 +32,8 @@ WXS_Somatic_Variant_SW \
 
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 
-CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
+#CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
+CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
 
 function process_oldrun {
     P=$1

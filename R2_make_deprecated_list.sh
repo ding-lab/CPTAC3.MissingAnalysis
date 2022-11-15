@@ -1,14 +1,13 @@
 # Make list of aliquots and UUIDs which are to be excluded from analyses because they have 
-# beeen marked as deprecated in CPTAC3-specific datasets
-
-# /storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog/SampleRename.dat
+# been marked as deprecated in CPTAC3-specific datasets
 
 # Work associated with the above list is typically on Shiso and can be obtained by looking at 
 # git history of the above file.
 
 # Write two files, deprecated_aliquot.dat and deprecated_uuid.dat
 
-DAT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog/SampleRename.dat"
+CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
+DAT="$CATALOG_ROOT/SampleRename.dat"
 OUTD="dat"
 mkdir -p $OUTD
 OUT_UUID="$OUTD/deprecated_uuid.dat"
