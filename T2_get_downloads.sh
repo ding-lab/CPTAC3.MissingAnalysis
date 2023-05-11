@@ -23,7 +23,8 @@ function collect_UUID_requested {
     S=$1    # system
     PIPELINES="$2"
     for P in $PIPELINES; do
-        D="Results/compute1-results/results-AML-GBM/${P}.run_list.tsv"
+        #D="Results/compute1-results/results-AML-GBM/${P}.run_list.tsv"
+        D="results/${P}.run_list.tsv"
         if [ ! -f $D ]; then
             >&2 echo ERROR: $D does not exist
             exit 1
@@ -83,12 +84,13 @@ function process_system {
 # for each download system, get all UUIDs from all pipeline processing request for that system
 # Then remove from list all UUIDs which already exist on the system
 
-KATMAI_PIPELINES="Methylation_Array miRNA-Seq RNA-Seq_Fusion RNA-Seq_Transcript"
-MGI_PIPELINES="WXS_Germline"
-STORAGE1_PIPELINES="RNA-Seq_Expression WGS_CNV_Somatic WGS_SV WXS_MSI WXS_Somatic_Variant_SW WXS_Somatic_Variant_TD"
+#KATMAI_PIPELINES="Methylation_Array miRNA-Seq RNA-Seq_Fusion RNA-Seq_Transcript"
+#MGI_PIPELINES="WXS_Germline"
+#STORAGE1_PIPELINES="RNA-Seq_Expression WGS_CNV_Somatic WGS_SV WXS_MSI WXS_Somatic_Variant_SW WXS_Somatic_Variant_TD"
+STORAGE1_PIPELINES="WXS_Somatic_Variant_TD WGS_Somatic_Variant_TD"
 
-process_system katmai "$KATMAI_PIPELINES"
+#process_system katmai "$KATMAI_PIPELINES"
 process_system storage1 "$STORAGE1_PIPELINES"
-process_system MGI "$MGI_PIPELINES"
+#process_system MGI "$MGI_PIPELINES"
 
 rm -f $OUTD/*.tmp

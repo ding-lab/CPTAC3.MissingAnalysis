@@ -16,7 +16,7 @@ def eprint(*args, **kwargs):
 def read_catalog(catalog_fn):
     catalog = pd.read_csv(catalog_fn, sep="\t", keep_default_na=False)
     # at some point, expand metadata into something convenient
-    catalog['metadata'] = catalog.apply(lambda row: json.loads(row['metadata']), axis=1)
+#    catalog['metadata'] = catalog.apply(lambda row: json.loads(row['metadata']), axis=1)
     return catalog
 
 # There may be more than one datafile in a dataset for composite datasets (e.g. FASTQ R1 and R2)
@@ -28,6 +28,19 @@ def read_catalog(catalog_fn):
 # Return a list of datafiles, 
 # with datafile a dictionary {'datafile_name', 'aliquot_tag', 'case', 'uuid', 'specimen_name'}.  
 
+# Catalog4
+#     1  dataset_name
+#     2  case
+#     3  sample_type
+#     4  data_format
+#     5  experimental_strategy
+#     6  preservation_method
+#     7  aliquot
+#     8  file_name
+#     9  file_size
+#    10  id
+#    11  md5sum
+
 # TODO: simplify arguments
 def get_datafile_list(catalog, cases, sample_types=[], alignment=None, experimental_strategy=None, data_format=None, data_variety=None, debug=False):
     case_loc = catalog['case'].isin(cases)
@@ -36,18 +49,18 @@ def get_datafile_list(catalog, cases, sample_types=[], alignment=None, experimen
     cat = catalog.rename(columns={'dataset_name': 'datafile_name'})
 
 # https://stackoverflow.com/questions/17071871/how-do-i-select-rows-from-a-dataframe-based-on-column-values
-    alignment_loc = (cat['alignment'] == alignment) if alignment is not None else True
     experimental_strategy_loc = (cat['experimental_strategy'] == experimental_strategy) if experimental_strategy is not None else True
     data_format_loc = (cat['data_format'] == data_format) if data_format is not None else True
 
-    data_variety_loc = (cat['data_variety'].str.contains(data_variety)) if data_variety is not None else True
-    all_loc = case_loc & sample_types_loc & experimental_strategy_loc & alignment_loc & data_format_loc & data_variety_loc
+#    data_variety_loc = (cat['data_variety'].str.contains(data_variety)) if data_variety is not None else True
+    all_loc = case_loc & sample_types_loc & experimental_strategy_loc & data_format_loc 
 
     # all_loc selects the rows of interest.  Now extract from metadata particular fields to catalog to make processing later easier
     # * aliquot_tag
-    cat['aliquot_tag'] = cat['metadata'].apply(lambda j: j['aliquot_tag'])
+    #cat['aliquot_tag'] = cat['metadata'].apply(lambda j: j['aliquot_tag'])
+    cat['aliquot_tag'] = cat['aliquot'] # keeping aliquot tag but making it the same as aliquot label
 
-    return( cat.loc[all_loc, ['datafile_name', 'uuid', 'case', 'aliquot_tag', 'specimen_name']])
+    return( cat.loc[all_loc, ['datafile_name', 'id', 'case', 'aliquot_tag', 'aliquot']])
 
 def get_simple_dataset_list(catalog, cases, sample_types, alignment, experimental_strategy, data_format, data_varieties, debug):
 # if data_varieties is not specified or only one is, the dataset list is just the file_list
@@ -222,7 +235,6 @@ if __name__ == "__main__":
     #  * compound datasets have multiple data varieties (e.g. "-v R1,R2")
     #  * paired workflows have two sample types defined (e.g. "-t tumor -T tissue_normal")
 
-
     # Paired workflows read two datasets
     sample_types = args.sample_type.split(',')
     is_paired_workflow = args.sample_type2 is not None
@@ -236,6 +248,10 @@ if __name__ == "__main__":
     if data_varieties is not None and len(data_varieties) > 1:
         compound_dataset=True
 #        pipeline_info.update({'compound_dataset': len(data_varieties)})
+
+    if args.debug:
+        eprint("is_paired_workflow = " + str(is_paired_workflow))
+        eprint("compound_dataset = " + str(compound_dataset))
 
     # pipeline data: dictionary of pipeline-associated variables which are appended to run_data
     #   * is_paired (if true, run_list has 2 input datasets, otherwise it has one)

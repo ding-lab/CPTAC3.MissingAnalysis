@@ -186,7 +186,7 @@ while read PIPELINE_DETS; do
 		ARGS="$ARGS -v $DATA_VARIETY"
 	fi
 
-    if [ $SAMPLE_TYPE2 != "." ]; then
+    if [ "$SAMPLE_TYPE2" != "." ]; then
         ARGS="$ARGS -T $SAMPLE_TYPE2"
     fi
 

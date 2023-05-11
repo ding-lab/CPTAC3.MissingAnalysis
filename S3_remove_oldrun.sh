@@ -1,24 +1,19 @@
 # Remove deprecated aliquots and UUIDs based on blacklists provided by Mathangi
 # for CPTAC3 catalog work
 
+#PIPELINES="\
+#WGS_Somatic_Variant_TD \
+#"
 PIPELINES="\
-miRNA-Seq \
-Methylation_Array \
-RNA-Seq_Expression \
-RNA-Seq_Fusion \
-RNA-Seq_Transcript \
-WGS_CNV_Somatic \
-WGS_SV \
-WXS_Germline \
-WXS_MSI \
-WXS_Somatic_Variant_TD \
-WXS_Somatic_Variant_SW \
+WGS_CNV_Somatic	\
+WGS_SV\
 "
 
 DISEASES_FN="dat/diseases.dat"
 
 OUTD="dat"
 
+PWD=$(pwd)
 
 function remove_oldrun {
     P=$1
@@ -28,8 +23,9 @@ function remove_oldrun {
 
         # making some assumptions about output locations
         # Example run list: dat/results/Methylation_Array/PDA/request_run_list.dat
-        RL="dat/results/$P/$DIS/C_deprecated.run_list.dat"
-        OUTFN="dat/results/$P/$DIS/D_oldrun.run_list.dat"
+        #RL="dat/results/$P/$DIS/C_deprecated.run_list.dat"
+        RL="$PWD/dat/results/$P/$DIS/B_request_run_list.dat"
+        OUTFN="$PWD/dat/results/$P/$DIS/D_oldrun.run_list.dat"
 
         EXCLUDE_ALQ="dat/results/$P/oldrun_aliquot_list.dat"
 

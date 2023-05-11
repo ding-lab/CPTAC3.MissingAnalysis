@@ -9,7 +9,7 @@ Usage:
 Options (all options required):
 -h: Print this help message
 -d: print debug messages
--C CATALOG: Path to historic catalog2 file. Required 
+-C CATALOG: Path to REST API-based catalog file. Required 
 -o OUTFN: Output file. Required
 -p PIPELINE_NAME: canonical name of pipeline we're evaluating.  Required
 -P PIPELINE_CONFIG_FN: configuration file with per-pipeline definitions.  Required
@@ -116,6 +116,24 @@ function test_exit_status {
 # WARNING if anything other than one aliquot found
 # Actually, situation of no aliquot found is common. For instance, we've processed a dataset which did not 
 # exist at time historical catalog was made.  Would be good to pre-filter results based on timestamp - TODO
+
+#$ header DLBCL.Catalog3.tsv
+#     1  dataset_name
+#     2  case
+#     3  disease
+#     4  experimental_strategy
+#     5  sample_type
+#     6  specimen_name
+#     7  filename
+#     8  filesize
+#     9  data_format
+#    10  data_variety
+#    11  alignment
+#    12  project
+#    13  uuid
+#    14  md5
+#    15  metadata
+
 function get_aliquot {
     UUID=$1
     # CATALOG is read as a global
@@ -125,10 +143,10 @@ function get_aliquot {
         exit 1
     fi
 
-    ALIQUOT=$(awk -v uuid=$UUID 'BEGIN{FS="\t"; OFS="\t"}{if ($11 == uuid) print $6}' $CATALOG | sort -u)
+    ALIQUOT=$(awk -v uuid=$UUID 'BEGIN{FS="\t"; OFS="\t"}{if ($13 == uuid) print $6}' $CATALOG | sort -u)
 
     if [ -z $ALIQUOT ]; then
-        # >&2 echo WARNING: No entry found in $CATALOG for $UUID
+        >&2 echo WARNING: No entry found in $CATALOG for $UUID
         return
     elif [ $(echo "$ALIQUOT" | wc -l) != "1" ]; then
         >&2 echo WARNING: multiple entries found in $CATALOG for $UUID
@@ -191,8 +209,8 @@ done <$TMP
 
 if [ -z "$DEBUG" ]; then
     CMD="rm -f $TMP"
-    >&2 echo Running: $CMD
-    eval $CMD
+    >&2 echo NOT Running: $CMD
+#    eval $CMD
 else
     >&2 echo Retaining temp file $TMP
 fi

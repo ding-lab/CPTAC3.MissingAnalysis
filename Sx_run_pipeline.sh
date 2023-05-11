@@ -7,12 +7,20 @@ DIS=$2
 shift 2
 XARGS="$@"
 
-CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
-#CATALOG_ROOT="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Common/CPTAC3.catalog"
-CATALOG="$CATALOG_ROOT/Catalog3/CPTAC3.Catalog3.tsv"
+# This is general purpose catalog of all datasets
+#CATALOG_ROOT="/cache1/fs1/home1/Active/home/m.wyczalkowski/Projects/GDAN/GDAN.catalog/Catalog3"
+#CATALOG="$CATALOG_ROOT/DLBCL.GDC_REST.20230409-AWG.tsv"
+
+# This is for high depth WGS catalog to create all run pairs
+CATALOG="/cache1/fs1/home1/Active/home/m.wyczalkowski/Projects/GDAN/Work/20230404.DLBCL_212/CPTAC3.MissingAnalysis/config/DLBCL.GDC_REST.20230409-AWG.hdWGS.tsv"
+
 PIPELINE_CONFIG_FN="config/pipeline_config.tsv"
 
-DAS="$CATALOG_ROOT/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
+# custom / ad hoc analysis summary
+#DAS="$CATALOG_ROOT/DCC_Analysis_Summary/$PIPELINE_NAME.DCC_analysis_summary.dat"
+DAS="/cache1/fs1/home1/Active/home/m.wyczalkowski/Projects/GDAN/Work/20230404.DLBCL_212/CPTAC3.MissingAnalysis/AnalysisSummaryLinks/$PIPELINE_NAME.AnalysisSummary.dat"
+
+
 DAS_ARG="-D $DAS"
 
 # Add aliquot info to all output

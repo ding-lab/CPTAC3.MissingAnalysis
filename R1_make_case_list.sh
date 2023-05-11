@@ -3,9 +3,9 @@
 #   these are written to per-disease files
 # Also, create a list of diseases we're processing for later use
 
-CATALOG_ROOT="/Users/mwyczalk/Projects/CPTAC3/CPTAC3.catalog"
+CATALOG_ROOT="/home/m.wyczalkowski/Projects/GDAN/GDAN.catalog/Catalog3"
 
-ALL_CASES="$CATALOG_ROOT/CPTAC3.cases.dat"
+ALL_CASES="$CATALOG_ROOT/DLBCL.Cases.tsv"
 DISEASES_FN="dat/diseases.dat"
 OUTD="dat/cases"
 mkdir -p $OUTD
@@ -19,7 +19,7 @@ function process {
 }
 
 cat << EOF > $DISEASES_FN
-AML
+DLBCL
 EOF
 
 if [ ! -f $ALL_CASES ]; then
